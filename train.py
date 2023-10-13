@@ -1,10 +1,10 @@
 import pickle
-from utils.dataset import make_datapath_list, LabeledDataset, LabeledTransform, ValLabeledTransform, UnlabeledDataset, UnlabeledTransform
+from dataloader.dataset import make_datapath_list, LabeledDataset, LabeledTransform, ValLabeledTransform, UnlabeledDataset, UnlabeledTransform
 import torch.utils.data as data
 import torch
 from utils.loss_function import DiceBCELoss, BayesBCELoss
 import segmentation_models_pytorch as smp
-from utils.bayesian_deeplab import Dropout2d, DeepLabv3plusModel
+from models.bayesian_deeplab import Dropout2d, DeepLabv3plusModel
 from utils.earlystopping import EarlyStopping
 import os
 import time

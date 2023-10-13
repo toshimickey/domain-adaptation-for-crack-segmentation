@@ -1,8 +1,8 @@
 from utils.segmentation_eval import DiceScore, Accuracy, Precision, Recall, Specificity
 import torch
 import torch.utils.data as data
-from utils.dataset import make_datapath_list, LabeledDataset, ValLabeledTransform
-from utils.bayesian_deeplab import DeepLabv3plusModel
+from dataloader.dataset import make_datapath_list, LabeledDataset, ValLabeledTransform
+from models.bayesian_deeplab import DeepLabv3plusModel
 
 makepath = make_datapath_list()
 test_img_list, test_anno_list = makepath.get_list("test")

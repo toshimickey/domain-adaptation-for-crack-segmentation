@@ -1,7 +1,7 @@
 import torch
 import torch.utils.data as data
-from utils.dataset import make_datapath_list, UnlabeledDataset, UnlabeledTransform
-from utils.bayesian_deeplab import DeepLabv3plusModel
+from dataloader.dataset import make_datapath_list, UnlabeledDataset, UnlabeledTransform
+from models.bayesian_deeplab import DeepLabv3plusModel
 import os
 import numpy as np
 from PIL import Image
