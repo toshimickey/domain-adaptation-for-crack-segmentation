@@ -1,5 +1,7 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 class DiceBCELoss(nn.Module):
     def __init__(self, weight=None, size_average=True):
         super(DiceBCELoss, self).__init__()
@@ -86,21 +88,16 @@ class DiceBCELoss(nn.Module):
 #         return bce_loss
 
 class BayesBCELoss(nn.Module):
-    def __init__(self):
+    def __init__(self, alpha=1000):
         super(BayesBCELoss, self).__init__()
+        self.alpha = alpha
 
-    def forward(self, inputs, targets, vars, alpha=1000):
+    def forward(self, inputs, targets, vars):
         inputs = torch.sigmoid(inputs)
         inputs = torch.clamp(inputs, 1e-7, 1-1e-7)
         inputs = inputs.view(-1)
         targets = targets.view(-1)
         vars = vars.view(-1)
 
-        bce_loss = torch.mean(-torch.exp(-vars*alpha) * (targets * torch.log(inputs) + (1 - targets) * torch.log(1 - inputs)))
+        bce_loss = torch.mean(-torch.exp(-vars*self.alpha) * (targets * torch.log(inputs) + (1 - targets) * torch.log(1 - inputs)))
         return bce_loss
-
-class_criterion = DiceBCELoss()
-cons_criterion = BayesBCELoss()
-
-optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
-#model.parameters()は訓練対象のパラメータ

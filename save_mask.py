@@ -1,10 +1,27 @@
-#　実行前にunlabeled loaderの定義を見直す
+import torch
+import torch.utils.data as data
+from utils.dataset import make_datapath_list, UnlabeledDataset, UnlabeledTransform
+from utils.bayesian_deeplab import DeepLabv3plusModel
+import os
+import numpy as np
+from PIL import Image
+from scipy.ndimage import label
+from skimage import measure
+
 # unlabeled dataに対するpred_mean, pred_varを保存
-# 同じファイル名で保存
-#img_file_path = sorted(glob.glob('data/Chundata/original_split/*'))
-img_filename = sorted(os.listdir('data/Chundata/original_split'))
+makepath = make_datapath_list()
+train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list = makepath.get_list("train_unlabeled")
+train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=UnlabeledTransform(crop_size=256, rotation=False))
 train_unlabeled_dataloader = data.DataLoader(
-    train_unlabeled_dataset, batch_size=16, shuffle=False, num_workers=2, pin_memory=True)
+    train_unlabeled_dataset, batch_size=16, shuffle=True, num_workers=2, pin_memory=True)
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+model_wrapper = DeepLabv3plusModel(device)
+model = model_wrapper.get_model()
+
+img_filename = sorted(os.listdir('data/Chundata/original_split'))
+
+fol_name = "231010_iter2"
 
 n_samples = 100
 count = 0
@@ -42,8 +59,6 @@ with torch.no_grad():
         if flag:
             break
 
-from scipy.ndimage import label
-from skimage import measure
 def process_image(image, area_threshold=100, compactness_threshold=0.015, eccentricity_threshold=0.95):
     # 画像を2値化する→この処理はsigmoid有無に関わらずそのままでOK
     binary_image = image > 0

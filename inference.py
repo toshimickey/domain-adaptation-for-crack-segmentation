@@ -1,4 +1,18 @@
 from utils.segmentation_eval import DiceScore, Accuracy, Precision, Recall, Specificity
+import torch
+import torch.utils.data as data
+from utils.dataset import make_datapath_list, LabeledDataset, ValLabeledTransform
+from utils.bayesian_deeplab import DeepLabv3plusModel
+
+makepath = make_datapath_list()
+test_img_list, test_anno_list = makepath.get_list("test")
+test_dataset = LabeledDataset(test_img_list, test_anno_list, transform=ValLabeledTransform(crop_size=256))
+test_dataloader = data.DataLoader(
+    test_dataset, batch_size=64, shuffle=False, num_workers=2, pin_memory=True)
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+model_wrapper = DeepLabv3plusModel(device)
+model = model_wrapper.get_model()
 
 n_samples = 100
 eval_method = DiceScore()

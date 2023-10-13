@@ -1,3 +1,10 @@
+import glob
+import random
+import torch
+from torch.utils.data import Dataset
+import torchvision.transforms as transforms
+from PIL import Image
+
 # define make_datapath_list
 class make_datapath_list():
   def __init__(self):
@@ -65,12 +72,7 @@ class make_datapath_list():
         anno_list.append(path)
       return img_list, anno_list
 
-makepath = make_datapath_list()
-train_labeled_img_list, train_labeled_anno_list = makepath.get_list("train_labeled")
-train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list = makepath.get_list("train_unlabeled")
-val_img_list, val_anno_list = makepath.get_list("val")
 
-from torch.utils.data import Dataset
 class LabeledDataset(Dataset):
     def __init__(self, img_list, label_list, transform=None):
         self.img_list = img_list
@@ -94,7 +96,7 @@ class LabeledDataset(Dataset):
 
         return image, label
     
-import torchvision.transforms as transforms
+
 class LabeledTransform():
     def __init__(self, crop_size):
         self.crop_size = crop_size
@@ -144,7 +146,7 @@ class LabeledTransform():
 
         return image, mask
     
-import torchvision.transforms as transforms
+
 class ValLabeledTransform():
     def __init__(self, crop_size):
         self.crop_size = crop_size
@@ -171,7 +173,7 @@ class ValLabeledTransform():
 
         return image, mask
     
-from torch.utils.data import Dataset
+
 class UnlabeledDataset(Dataset):
     def __init__(self, img_list, mean_list, var_list, transform=None):
         self.img_list = img_list
@@ -199,12 +201,13 @@ class UnlabeledDataset(Dataset):
 
         return image, mean, var
     
-import torchvision.transforms as transforms
+
 class UnlabeledTransform():
-    def __init__(self, crop_size):
+    def __init__(self, crop_size, rotation=True):
         self.crop_size = crop_size
         self.mean = [0.473, 0.493, 0.504]
         self.std = [0.163, 0.154, 0.153]
+        self.rotation = rotation
 
     def __call__(self, image, mean, var):
         # センタークロップ
@@ -229,17 +232,18 @@ class UnlabeledTransform():
         # var = transforms.functional.crop(var, i, j, h, w)
 
         #####保存時はここをコメントアウトする#####
-        # # 水平反転
-        # if random.random() > 0.5:
-        #     image = transforms.functional.hflip(image)
-        #     mean = transforms.functional.hflip(mean)
-        #     var = transforms.functional.hflip(var)
+        if self.rotation:
+            # 水平反転
+            if random.random() > 0.5:
+                image = transforms.functional.hflip(image)
+                mean = transforms.functional.hflip(mean)
+                var = transforms.functional.hflip(var)
 
-        # # 垂直反転
-        # if random.random() > 0.5:
-        #     image = transforms.functional.vflip(image)
-        #     mean = transforms.functional.vflip(mean)
-        #     var = transforms.functional.vflip(var)
+            # 垂直反転
+            if random.random() > 0.5:
+                image = transforms.functional.vflip(image)
+                mean = transforms.functional.vflip(mean)
+                var = transforms.functional.vflip(var)
         ###########コメントアウト###########
 
         # imageの標準化

@@ -1,4 +1,42 @@
 import pickle
+from utils.dataset import make_datapath_list, LabeledDataset, LabeledTransform, ValLabeledTransform, UnlabeledDataset, UnlabeledTransform
+import torch.utils.data as data
+import torch
+from utils.loss_function import DiceBCELoss, BayesBCELoss
+import segmentation_models_pytorch as smp
+from utils.bayesian_deeplab import Dropout2d, DeepLabv3plusModel
+from utils.earlystopping import EarlyStopping
+import os
+import time
+import numpy as np
+
+
+makepath = make_datapath_list()
+train_labeled_img_list, train_labeled_anno_list = makepath.get_list("train_labeled")
+train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list = makepath.get_list("train_unlabeled")
+val_img_list, val_anno_list = makepath.get_list("val")
+
+train_labeled_dataset = LabeledDataset(train_labeled_img_list, train_labeled_anno_list, transform=LabeledTransform(crop_size=256))
+val_dataset = LabeledDataset(val_img_list, val_anno_list, transform=ValLabeledTransform(crop_size=256))
+train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=UnlabeledTransform(crop_size=256, rotation=True))
+
+train_labeled_dataloader = data.DataLoader(
+    train_labeled_dataset, batch_size=16, shuffle=True, num_workers=2, pin_memory=True)
+train_unlabeled_dataloader = data.DataLoader(
+    train_unlabeled_dataset, batch_size=16, shuffle=True, num_workers=2, pin_memory=True)
+val_dataloader = data.DataLoader(
+    val_dataset, batch_size=16, shuffle=False, num_workers=2, pin_memory=True)
+
+class_criterion = DiceBCELoss()
+cons_criterion = BayesBCELoss(alpha=1000)
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+model_wrapper = DeepLabv3plusModel(device)
+model = model_wrapper.get_model()
+
+optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
+#model.parameters()は訓練対象のパラメータ
+
 epochs = 1000
 train_loss = []
 train_cons_loss = []
