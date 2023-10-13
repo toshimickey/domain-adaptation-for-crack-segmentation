@@ -1,0 +1,1 @@
+# train, inference, save_maskを逐次的に実行する
