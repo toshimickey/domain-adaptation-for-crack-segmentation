@@ -7,7 +7,8 @@ from PIL import Image
 
 # define make_datapath_list
 class make_datapath_list():
-  def __init__(self):
+  def __init__(self,folname):
+    self.folname = folname
     img_file_path = sorted(glob.glob('data/Conglomerate/Train/images/*'))
     anno_file_path = sorted(glob.glob('data/Conglomerate/Train/masks/*'))
     combined = list(zip(img_file_path, anno_file_path))
@@ -21,8 +22,8 @@ class make_datapath_list():
     # img_file_path2, anno_file_path2 = zip(*combined2)
 
     # ここを変更しよう
-    mean_file_path = sorted(glob.glob('data/Chundata_unlabeled_mask/231007_iter1/pred_mean_corrected/*'))
-    var_file_path = sorted(glob.glob('data/Chundata_unlabeled_mask/231007_iter1/pred_var/*'))
+    mean_file_path = sorted(glob.glob(f'data/Chundata_unlabeled_mask/{self.folname}/pred_mean_corrected/*'))
+    var_file_path = sorted(glob.glob(f'data/Chundata_unlabeled_mask/{self.folname}/pred_var/*'))
 
 
     self.train_labeled_file_path = img_file_path[:7919]

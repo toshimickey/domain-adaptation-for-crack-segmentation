@@ -1,3 +1,5 @@
+import csv
+
 class EarlyStopping:
     def __init__(self, patience=50, delta=0, mode='min'):
         self.patience = patience
@@ -18,3 +20,9 @@ class EarlyStopping:
             self.counter += 1
             if self.counter >= self.patience:
                 self.early_stop = True
+
+def write_to_csv(epoch, loss_lst, filename):
+    with open(filename, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        loss_lst.insert(0,epoch)
+        writer.writerow(loss_lst)

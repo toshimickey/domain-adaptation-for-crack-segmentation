@@ -88,9 +88,10 @@ class DiceBCELoss(nn.Module):
 #         return bce_loss
 
 class BayesBCELoss(nn.Module):
-    def __init__(self, alpha=1000):
+    def __init__(self, alpha=1000, beta=10):
         super(BayesBCELoss, self).__init__()
         self.alpha = alpha
+        self.beta = beta
 
     def forward(self, inputs, targets, vars):
         inputs = torch.sigmoid(inputs)
@@ -100,4 +101,4 @@ class BayesBCELoss(nn.Module):
         vars = vars.view(-1)
 
         bce_loss = torch.mean(-torch.exp(-vars*self.alpha) * (targets * torch.log(inputs) + (1 - targets) * torch.log(1 - inputs)))
-        return bce_loss
+        return bce_loss*self.beta
