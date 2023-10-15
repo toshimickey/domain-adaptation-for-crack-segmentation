@@ -9,32 +9,28 @@ from PIL import Image
 class make_datapath_list():
   def __init__(self,folname):
     self.folname = folname
-    img_file_path = sorted(glob.glob('data/Conglomerate/Train/images/*'))
-    anno_file_path = sorted(glob.glob('data/Conglomerate/Train/masks/*'))
-    combined = list(zip(img_file_path, anno_file_path))
-    random.shuffle(combined)
-    img_file_path, anno_file_path = zip(*combined)
+    img_file_path = sorted(glob.glob('data/Train/images/*'))
+    anno_file_path = sorted(glob.glob('data/Train/masks/*'))
 
-    img_file_path2 = sorted(glob.glob('data/Chundata/original_split/*'))
-    anno_file_path2 = sorted(glob.glob('data/Chundata/teacher_split/*'))
-    # combined2 = list(zip(img_file_path2, anno_file_path2))
-    # random.shuffle(combined2)
-    # img_file_path2, anno_file_path2 = zip(*combined2)
+    img_file_path2 = sorted(glob.glob('data/original_split/*'))
+    anno_file_path2 = sorted(glob.glob('data/teacher_split/*'))
 
-    # ここを変更しよう
-    mean_file_path = sorted(glob.glob(f'data/Chundata_unlabeled_mask/{self.folname}/pred_mean_corrected/*'))
-    var_file_path = sorted(glob.glob(f'data/Chundata_unlabeled_mask/{self.folname}/pred_var/*'))
+    img_file_path3 = sorted(glob.glob('data/Test/images/*'))
+    anno_file_path3 = sorted(glob.glob('data/Test/masks/*'))
+
+    mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean_corrected/*'))
+    var_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_var/*'))
 
 
-    self.train_labeled_file_path = img_file_path[:7919]
-    self.train_anno_file_path = anno_file_path[:7919]
+    self.train_labeled_file_path = img_file_path
+    self.train_anno_file_path = anno_file_path
 
     self.train_unlabeled_file_path = img_file_path2[:4292]
     self.train_unlabeled_mean_path = mean_file_path
     self.train_unlabeled_var_path = var_file_path
 
-    self.val_file_path = img_file_path[7919:9899]
-    self.val_anno_file_path = anno_file_path[7919:9899]
+    self.val_file_path = img_file_path3
+    self.val_anno_file_path = anno_file_path3
 
     self.test_file_path = img_file_path2[4292:5292]
     self.test_anno_file_path = anno_file_path2[4292:5292]

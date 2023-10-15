@@ -34,9 +34,9 @@ def process_image(image, area_threshold=100, compactness_threshold=0.015, eccent
     return processed_image
 
 
-def save_mask(folname, net="deeplab", batch_size=16, num_workers=2):
+def save_mask(former_folname, folname, net="deeplab", batch_size=16, num_workers=2):
     # unlabeled dataに対するpred_mean, pred_varを保存
-    makepath = make_datapath_list()
+    makepath = make_datapath_list(former_folname)
     train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list = makepath.get_list("train_unlabeled")
     train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=UnlabeledTransform(crop_size=256, rotation=False))
     train_unlabeled_dataloader = data.DataLoader(
@@ -50,11 +50,11 @@ def save_mask(folname, net="deeplab", batch_size=16, num_workers=2):
     else:
         model = Unet256((3, 256, 256)).to(device)
 
-    img_filename = sorted(os.listdir('data/Chundata/original_split'))
+    img_filename = sorted(os.listdir('data/original_split'))
 
-    os.makedirs(f'data/Chundata_unlabeled_mask/{folname}/pred_mean')
-    os.makedirs(f'data/Chundata_unlabeled_mask/{folname}/pred_mean_corrected')
-    os.makedirs(f'data/Chundata_unlabeled_mask/{folname}/pred_var')
+    os.makedirs(f'data/unlabeled_mask/{folname}/pred_mean')
+    os.makedirs(f'data/unlabeled_mask/{folname}/pred_mean_corrected')
+    os.makedirs(f'data/unlabeled_mask/{folname}/pred_var')
 
     n_samples = 100
     count = 0
@@ -82,10 +82,10 @@ def save_mask(folname, net="deeplab", batch_size=16, num_workers=2):
                 image_mean = torch.sigmoid(pred_mean[j]).cpu().detach().numpy()*255
                 # image_mean = pred_mean[j].cpu().detach().clamp(0, 1).numpy()*255
                 image_mean = Image.fromarray(image_mean[0].astype('uint8'))
-                image_mean.save(f'data/Chundata_unlabeled_mask/{folname}/pred_mean/{img_filename[count]}')
+                image_mean.save(f'data/unlabeled_mask/{folname}/pred_mean/{img_filename[count]}')
                 # pred_var[j]をtensor.ptとして保存
                 image_var = pred_var[j][0].cpu()
-                torch.save(image_var, f'data/Chundata_unlabeled_mask/{folname}/pred_var/{img_filename[count]}'.rstrip('jpg')+'pt')
+                torch.save(image_var, f'data/unlabeled_mask/{folname}/pred_var/{img_filename[count]}'.rstrip('jpg')+'pt')
 
                 count += 1
                 if count == 4292:
@@ -94,8 +94,8 @@ def save_mask(folname, net="deeplab", batch_size=16, num_workers=2):
             if flag:
                 break
 
-    former_path = f'data/Chundata_unlabeled_mask/{folname}/pred_mean/'
-    latter_path = f'data/Chundata_unlabeled_mask/{folname}/pred_mean_corrected/'
+    former_path = f'data/unlabeled_mask/{folname}/pred_mean/'
+    latter_path = f'data/unlabeled_mask/{folname}/pred_mean_corrected/'
     files = sorted(os.listdir(former_path))
 
     for i in range(len(files)):
