@@ -50,7 +50,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=16, num_workers
     else:
         model = Unet256((3, 256, 256)).to(device)
 
-    img_filename = sorted(os.listdir('data/original_split'))
+    img_filename = sorted(os.listdir('data/original_split_resized'))
 
     os.makedirs(f'data/unlabeled_mask/{folname}/pred_mean')
     os.makedirs(f'data/unlabeled_mask/{folname}/pred_mean_corrected')
