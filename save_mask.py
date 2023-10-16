@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 from scipy.ndimage import label
 from skimage import measure
+import torchvision.transforms as transforms
 
 def process_image(image, area_threshold=100, compactness_threshold=0.015, eccentricity_threshold=0.95):
     # 画像を2値化する→この処理はsigmoid有無に関わらずそのままでOK
@@ -33,12 +34,11 @@ def process_image(image, area_threshold=100, compactness_threshold=0.015, eccent
     processed_image = np.where(crack_label, image, 0)
     return processed_image
 
-
 def save_mask(former_folname, folname, net="deeplab", batch_size=16, num_workers=2):
     # unlabeled dataに対するpred_mean, pred_varを保存
     makepath = make_datapath_list(former_folname)
     train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list = makepath.get_list("train_unlabeled")
-    train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=UnlabeledTransform(crop_size=256, flip=False))
+    train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=UnlabeledTransform(crop_size=512, flip=False, scaling=False))
     train_unlabeled_dataloader = data.DataLoader(
         train_unlabeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
 
@@ -48,7 +48,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=16, num_workers
         model_wrapper = DeepLabv3plusModel(device)
         model = model_wrapper.get_model()
     else:
-        model = Unet256((3, 256, 256)).to(device)
+        model = Unet256((3, 512, 512)).to(device)
 
     img_filename = sorted(os.listdir('data/original_split_resized'))
 

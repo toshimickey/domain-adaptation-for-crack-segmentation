@@ -8,7 +8,7 @@ from models.bayesian_unet import Unet256
 def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers=2):
     makepath = make_datapath_list(former_folname)
     test_img_list, test_anno_list = makepath.get_list("test")
-    test_dataset = LabeledDataset(test_img_list, test_anno_list, transform=ValLabeledTransform(crop_size=256))
+    test_dataset = LabeledDataset(test_img_list, test_anno_list, transform=ValLabeledTransform(crop_size=512))
     test_dataloader = data.DataLoader(
         test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
@@ -18,7 +18,7 @@ def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers
         model_wrapper = DeepLabv3plusModel(device)
         model = model_wrapper.get_model()
     else:
-        model = Unet256((3, 256, 256)).to(device)
+        model = Unet256((3, 512, 512)).to(device)
 
     n_samples = 100
     eval_method = DiceScore()

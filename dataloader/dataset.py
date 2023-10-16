@@ -100,15 +100,15 @@ class LabeledTransform():
 
     def __call__(self, image, mask):
         # # ランダムなスケールを1.0~2.0の中で選択する
-        # scale = torch.FloatTensor(1).uniform_(1.0, 2.0)
+        scale = torch.FloatTensor(1).uniform_(1.0, 2.0)
 
-        # w, h = image.size
-        # new_width = int(round(w * scale.item()))
-        # new_height = int(round(h * scale.item()))
+        w, h = image.size
+        new_width = int(round(w * scale.item()))
+        new_height = int(round(h * scale.item()))
 
         # # 画像をスケール倍にリサイズする
-        # image = transforms.Resize((new_width, new_height))(image)
-        # mask = transforms.Resize((new_width, new_height))(mask)
+        image = transforms.Resize((new_width, new_height))(image)
+        mask = transforms.Resize((new_width, new_height))(mask)
 
         # ランダムクロップ
         i, j, h, w = transforms.RandomCrop.get_params(image, output_size=(self.crop_size, self.crop_size))
@@ -188,28 +188,30 @@ class UnlabeledDataset(Dataset):
     
 
 class UnlabeledTransform():
-    def __init__(self, crop_size, flip=True):
+    def __init__(self, crop_size, flip=True, scaling=True):
         self.crop_size = crop_size
         self.flip = flip
+        self.scaling = scaling
 
     def __call__(self, image, mean, var):
+        if self.scaling:
+            # # ランダムなスケールを1.0~2.0の中で選択する
+            scale = torch.FloatTensor(1).uniform_(1.0, 2.0)
+
+            w, h = image.size
+            new_width = int(round(w * scale.item()))
+            new_height = int(round(h * scale.item()))
+
+            # # 画像をスケール倍にリサイズする
+            image = transforms.Resize((new_width, new_height))(image)
+            mean = transforms.Resize((new_width, new_height))(mean)
+            var = transforms.Resize((new_width, new_height))(var)
+
         # ランダムクロップ
         i, j, h, w = transforms.RandomCrop.get_params(image, output_size=(self.crop_size, self.crop_size))
         image = transforms.functional.crop(image, i, j, h, w)
         mean = transforms.functional.crop(mean, i, j, h, w)
         var = transforms.functional.crop(var, i, j, h, w)
-
-        # # ランダムなスケールを1.0~2.0の中で選択する
-        # scale = torch.FloatTensor(1).uniform_(1.0, 2.0)
-
-        # w, h = image.size
-        # new_width = int(round(w * scale.item()))
-        # new_height = int(round(h * scale.item()))
-
-        # # 画像をスケール倍にリサイズする
-        # image = transforms.Resize((new_width, new_height))(image)
-        # mean = transforms.Resize((new_width, new_height))(mean)
-        # var = transforms.Resize((new_width, new_height))(var)
 
         if self.flip:
             # 水平反転
