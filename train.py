@@ -11,7 +11,7 @@ from utils.module import EarlyStopping, write_to_csv
 from dataloader.dataset import make_datapath_list, LabeledDataset, LabeledTransform, ValLabeledTransform, UnlabeledDataset, UnlabeledTransform
 
 
-def train(former_folname, folname, net="deeplab", batch_size=16, num_workers=2, epochs=500, alpha=1000, beta=10):
+def train(former_folname, folname, first=False, net="deeplab", batch_size=16, num_workers=2, epochs=300, alpha=1000, beta=10):
     # make dataloader
     makepath = make_datapath_list(former_folname)
     train_labeled_img_list, train_labeled_anno_list = makepath.get_list("train_labeled")
@@ -53,7 +53,10 @@ def train(former_folname, folname, net="deeplab", batch_size=16, num_workers=2, 
     csv_filename = 'loss/'+folname+'_loss/loss.csv'
     with open(csv_filename, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['Epoch', 'Train Loss', 'Train Consistency Loss', 'Validation Loss'])
+        if first:
+            writer.writerow(['Epoch', 'Train Loss', 'Validation Loss'])
+        else:
+            writer.writerow(['Epoch', 'Train Loss', 'Train Consistency Loss', 'Validation Loss'])
 
     model = model.to(device)
 
@@ -73,18 +76,19 @@ def train(former_folname, folname, net="deeplab", batch_size=16, num_workers=2, 
             loss.backward()
             optimizer.step()
             running_train_loss.append(loss.item())
+        
+        if not first:
+            for image, mean, var in train_unlabeled_dataloader:
+                image = image.to(device,dtype=torch.float)
+                mean = mean.to(device,dtype=torch.float)
+                var = var.to(device,dtype=torch.float)
 
-        for image, mean, var in train_unlabeled_dataloader:
-            image = image.to(device,dtype=torch.float)
-            mean = mean.to(device,dtype=torch.float)
-            var = var.to(device,dtype=torch.float)
-
-            pred_mask = model.forward(image)
-            loss = cons_criterion(pred_mask,mean,var)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            running_train_cons_loss.append(loss.item())
+                pred_mask = model.forward(image)
+                loss = cons_criterion(pred_mask,mean,var)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                running_train_cons_loss.append(loss.item())
 
         running_val_loss = []
         model.eval()
@@ -99,25 +103,33 @@ def train(former_folname, folname, net="deeplab", batch_size=16, num_workers=2, 
         epoch_train_loss = np.mean(running_train_loss)
         print('Train loss: {}'.format(epoch_train_loss))
 
-        epoch_train_cons_loss = np.mean(running_train_cons_loss)
-        print('Train consistency loss: {}'.format(epoch_train_cons_loss))
+        if not first:
+            epoch_train_cons_loss = np.mean(running_train_cons_loss)
+            print('Train consistency loss: {}'.format(epoch_train_cons_loss))
 
         epoch_val_loss = np.mean(running_val_loss)
         print('Validation loss: {}'.format(epoch_val_loss))
 
         # saving loss in csv
-        loss = [epoch_train_loss, epoch_train_cons_loss, epoch_val_loss] 
-        write_to_csv(epoch, loss, csv_filename)
+        if first:
+            loss = [epoch_train_loss, epoch_val_loss] 
+            write_to_csv(epoch+1, loss, csv_filename)
+        else:
+            loss = [epoch_train_loss, epoch_train_cons_loss, epoch_val_loss] 
+            write_to_csv(epoch+1, loss, csv_filename)
 
         time_elapsed = time.time() - start_time
         print('{:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
 
         with torch.no_grad():
-            # Early Stopping by train_cons_loss
-            earlystopping(epoch_train_cons_loss)
+            # Early Stopping
+            if first:
+                earlystopping(epoch_val_loss)
+            else:
+                earlystopping(epoch_train_cons_loss)
+
             if earlystopping.early_stop:
                 print("Early stopping")
-                torch.save(model.to('cpu').state_dict(), 'weights/'+folname+'_weights/last.pth')
                 break
             if earlystopping.counter == 0:
                 print(f"Consistency Loss declined to {earlystopping.best_score}")
@@ -127,3 +139,5 @@ def train(former_folname, folname, net="deeplab", batch_size=16, num_workers=2, 
                 model = model.to(device)
 
             print(f'Early Stopping Counter = {earlystopping.counter}')
+
+    torch.save(model.to('cpu').state_dict(), 'weights/'+folname+'_weights/last.pth')
