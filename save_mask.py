@@ -38,7 +38,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=16, num_workers
     # unlabeled dataに対するpred_mean, pred_varを保存
     makepath = make_datapath_list(former_folname)
     train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list = makepath.get_list("train_unlabeled")
-    train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=UnlabeledTransform(crop_size=256, rotation=False))
+    train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=UnlabeledTransform(crop_size=256, flip=False))
     train_unlabeled_dataloader = data.DataLoader(
         train_unlabeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
 

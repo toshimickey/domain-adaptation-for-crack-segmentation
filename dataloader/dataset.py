@@ -12,8 +12,8 @@ class make_datapath_list():
     img_file_path = sorted(glob.glob('data/Train/images/*'))
     anno_file_path = sorted(glob.glob('data/Train/masks/*'))
 
-    img_file_path2 = sorted(glob.glob('data/original_split/*'))
-    anno_file_path2 = sorted(glob.glob('data/teacher_split/*'))
+    img_file_path2 = sorted(glob.glob('data/original_split_resized/*'))
+    anno_file_path2 = sorted(glob.glob('data/teacher_split_resized/*'))
 
     img_file_path3 = sorted(glob.glob('data/Test/images/*'))
     anno_file_path3 = sorted(glob.glob('data/Test/masks/*'))
@@ -97,8 +97,6 @@ class LabeledDataset(Dataset):
 class LabeledTransform():
     def __init__(self, crop_size):
         self.crop_size = crop_size
-        self.mean = [0.473, 0.493, 0.504]
-        self.std = [0.163, 0.154, 0.153]
 
     def __call__(self, image, mask):
         # # ランダムなスケールを1.0~2.0の中で選択する
@@ -132,10 +130,6 @@ class LabeledTransform():
         # image = transforms.functional.rotate(image,angle)
         # mask = transforms.functional.rotate(mask,angle)
 
-        # # imageの標準化
-        # normalize = transforms.Normalize(mean=self.mean, std=self.std)
-        # image = normalize(transforms.ToTensor()(image))
-
         # テンソルに変換
         image = transforms.ToTensor()(image)
         mask = transforms.ToTensor()(mask)
@@ -147,8 +141,6 @@ class LabeledTransform():
 class ValLabeledTransform():
     def __init__(self, crop_size):
         self.crop_size = crop_size
-        self.mean = [0.473, 0.493, 0.504]
-        self.std = [0.163, 0.154, 0.153]
 
     def __call__(self, image, mask):
         # リサイズ
@@ -158,10 +150,6 @@ class ValLabeledTransform():
         # センタークロップ
         image = transforms.CenterCrop(self.crop_size)(image)
         mask = transforms.CenterCrop(self.crop_size)(mask)
-
-        # # imageの標準化
-        # normalize = transforms.Normalize(mean=self.mean, std=self.std)
-        # image = normalize(transforms.ToTensor()(image))
 
         # テンソルに変換
         image = transforms.ToTensor()(image)
@@ -200,15 +188,16 @@ class UnlabeledDataset(Dataset):
     
 
 class UnlabeledTransform():
-    def __init__(self, crop_size, rotation=True):
+    def __init__(self, crop_size, flip=True):
         self.crop_size = crop_size
-        self.mean = [0.473, 0.493, 0.504]
-        self.std = [0.163, 0.154, 0.153]
-        self.rotation = rotation
+        self.flip = flip
 
     def __call__(self, image, mean, var):
-        # センタークロップ
-        image = transforms.CenterCrop(self.crop_size)(image)
+        # ランダムクロップ
+        i, j, h, w = transforms.RandomCrop.get_params(image, output_size=(self.crop_size, self.crop_size))
+        image = transforms.functional.crop(image, i, j, h, w)
+        mean = transforms.functional.crop(mean, i, j, h, w)
+        var = transforms.functional.crop(var, i, j, h, w)
 
         # # ランダムなスケールを1.0~2.0の中で選択する
         # scale = torch.FloatTensor(1).uniform_(1.0, 2.0)
@@ -222,14 +211,7 @@ class UnlabeledTransform():
         # mean = transforms.Resize((new_width, new_height))(mean)
         # var = transforms.Resize((new_width, new_height))(var)
 
-        # # ランダムクロップ
-        # i, j, h, w = transforms.RandomCrop.get_params(image, output_size=(self.crop_size, self.crop_size))
-        # image = transforms.functional.crop(image, i, j, h, w)
-        # mean = transforms.functional.crop(mean, i, j, h, w)
-        # var = transforms.functional.crop(var, i, j, h, w)
-
-        #####保存時はここをコメントアウトする#####
-        if self.rotation:
+        if self.flip:
             # 水平反転
             if random.random() > 0.5:
                 image = transforms.functional.hflip(image)
@@ -241,11 +223,6 @@ class UnlabeledTransform():
                 image = transforms.functional.vflip(image)
                 mean = transforms.functional.vflip(mean)
                 var = transforms.functional.vflip(var)
-        ###########コメントアウト###########
-
-        # imageの標準化
-        # normalize = transforms.Normalize(mean=self.mean, std=self.std)
-        # image = normalize(transforms.ToTensor()(image))
 
         # テンソルに変換
         image = transforms.ToTensor()(image)
