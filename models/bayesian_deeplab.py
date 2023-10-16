@@ -12,8 +12,7 @@ class Dropout2d(torch.nn.Module):
         return F.dropout2d(x, p=self.p, training=True, inplace=self.inplace)
     
 class DeepLabv3plusModel:
-    def __init__(self, device):
-        self.device = device
+    def __init__(self):
         self.model = self._create_model()
 
     def _create_model(self):
@@ -22,7 +21,7 @@ class DeepLabv3plusModel:
             encoder_weights='imagenet',
             in_channels=3,
             classes=1
-        ).to(self.device)
+        )
 
         encoder = model.encoder
         encoder.layer3 = torch.nn.Sequential(

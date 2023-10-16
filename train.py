@@ -11,7 +11,7 @@ from utils.module import EarlyStopping, write_to_csv
 from dataloader.dataset import make_datapath_list, LabeledDataset, LabeledTransform, ValLabeledTransform, UnlabeledDataset, UnlabeledTransform
 
 
-def train(former_folname, folname, first=False, net="deeplab", batch_size=16, num_workers=2, epochs=300, alpha=1000, beta=10):
+def train(former_folname, folname, first=False, net="deeplab", batch_size=64, num_workers=2, epochs=300, alpha=1000, beta=10):
     # make dataloader
     makepath = make_datapath_list(former_folname, first)
     train_labeled_img_list, train_labeled_anno_list = makepath.get_list("train_labeled")
@@ -37,13 +37,15 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=16, nu
     cons_criterion = BayesBCELoss(alpha,beta)
 
     # define model
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-
     if net == "deeplab":
-        model_wrapper = DeepLabv3plusModel(device)
+        model_wrapper = DeepLabv3plusModel()
         model = model_wrapper.get_model()
     else:
-        model = Unet256((3, 512, 512)).to(device)
+        model = Unet256((3, 512, 512))
+
+    model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 

@@ -12,13 +12,15 @@ def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers
     test_dataloader = data.DataLoader(
         test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-
     if net == "deeplab":
-        model_wrapper = DeepLabv3plusModel(device)
+        model_wrapper = DeepLabv3plusModel()
         model = model_wrapper.get_model()
     else:
-        model = Unet256((3, 512, 512)).to(device)
+        model = Unet256((3, 512, 512))
+
+    model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
 
     n_samples = 100
     eval_method = DiceScore()

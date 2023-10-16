@@ -34,7 +34,7 @@ def process_image(image, area_threshold=100, compactness_threshold=0.015, eccent
     processed_image = np.where(crack_label, image, 0)
     return processed_image
 
-def save_mask(former_folname, folname, net="deeplab", batch_size=16, num_workers=2):
+def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers=2):
     # unlabeled dataに対するpred_mean, pred_varを保存
     makepath = make_datapath_list(former_folname, first=True)
     train_unlabeled_img_list = makepath.get_list("train_unlabeled")
@@ -42,13 +42,15 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=16, num_workers
     train_unlabeled_dataloader = data.DataLoader(
         train_unlabeled_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-
     if net == "deeplab":
-        model_wrapper = DeepLabv3plusModel(device)
+        model_wrapper = DeepLabv3plusModel()
         model = model_wrapper.get_model()
     else:
-        model = Unet256((3, 512, 512)).to(device)
+        model = Unet256((3, 512, 512))
+
+    model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
 
     img_filename = sorted(os.listdir('data/original_split_resized'))
 
@@ -77,7 +79,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=16, num_workers
             # pred_varはpredsをsigmoidに通した後に分散をとる
             pred_var = torch.var(torch.sigmoid(preds), dim=0)
 
-            for j in range(16):
+            for j in range(batch_size):
                 # pred_mean[j]をsigmoidに通してjpgとして保存
                 image_mean = torch.sigmoid(pred_mean[j]).cpu().detach().numpy()*255
                 # image_mean = pred_mean[j].cpu().detach().clamp(0, 1).numpy()*255
@@ -88,7 +90,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=16, num_workers
                 torch.save(image_var, f'data/unlabeled_mask/{folname}/pred_var/{img_filename[count]}'.rstrip('jpg')+'pt')
 
                 count += 1
-                if count == 4292:
+                if count == len(train_unlabeled_dataset):
                     flag = True
                 break
             if flag:

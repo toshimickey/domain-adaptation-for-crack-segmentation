@@ -1,10 +1,11 @@
 # train, inference, save_maskを逐次的に実行する
 import train, inference, save_mask
-import csv
+import csv, os
 from utils.module import write_to_csv
 
 project = "231015"
 folnames = [project+"_iter1", project+"_iter2", project+"_iter3", project+"_iter4", project+"_iter5"]
+os.makedirs('results/'+ project +'_results', exist_ok=True)
 csv_filename = 'results/'+project+'_results/results.csv'
 with open(csv_filename, mode='w', newline='') as file:
     writer = csv.writer(file)
