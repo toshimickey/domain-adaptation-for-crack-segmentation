@@ -6,8 +6,8 @@ Unsupervised Domain Adaptation method using Bayesian Neural Network for crack se
 https://data.lib.vt.edu/articles/dataset/Concrete_Crack_Conglomerate_Dataset/16625056/1
 
 2. Then, download our Dataset from below [^2]:  
-https://drive.google.com/drive/folders/1pTUGTx88oTlIm3lsbdo3DKRqPadLrxD0?usp=sharing  
-https://drive.google.com/drive/folders/1sRKRFanXP4gbA0WkoEMzT7OWCSRonxPG?usp=sharing
+https://drive.google.com/drive/folders/1W_jDSnJvRNCwBB9KAty0JzsL8dC0QZr7?usp=drive_link  
+https://drive.google.com/drive/folders/1xTfMC7yiWWi2BFbdcG9ByMX4XWdW5cIM?usp=drive_link
 
 3. Set up the dataset using `dataloader/dataset.py` as a reference. You can also specify the original dataset.
 
