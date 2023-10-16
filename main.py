@@ -12,12 +12,12 @@ with open(csv_filename, mode='w', newline='') as file:
 
 for i in range(5):
     if i==0:
-        train(former_folname="hoge", folname=folnames[i], first=True)
-        scores = inference("hoge", folname=folnames[i])
+        train(former_folname="hoge", folname=folnames[i], first=True, net="deeplab", epochs=1000)
+        scores = inference("hoge", folname=folnames[i], net="deeplab")
         write_to_csv(i+1, scores, csv_filename)
-        save_mask(folname=folnames[i])
+        save_mask(former_folname="hoge", folname=folnames[i], net="deeplab")
     else:
-        train(former_folname=folnames[i-1], folname=folnames[i], first=False)
-        scores = inference(former_folname=folnames[i-1], folname=folnames[i])
+        train(former_folname=folnames[i-1], folname=folnames[i], first=False, net="deeplab", epochs=300)
+        scores = inference(former_folname=folnames[i-1], folname=folnames[i], net="deeplab")
         write_to_csv(i+1, scores, csv_filename)
-        save_mask(folname=folnames[i])
+        save_mask(former_folname=folnames[i-1], folname=folnames[i], net="deeplab")

@@ -1,6 +1,6 @@
 import torch
 import torch.utils.data as data
-from dataloader.dataset import make_datapath_list, UnlabeledDataset, UnlabeledTransform
+from dataloader.dataset import make_datapath_list, UnlabeledDataset2, UnlabeledTransform2
 from models.bayesian_deeplab import DeepLabv3plusModel
 from models.bayesian_unet import Unet256
 import os
@@ -36,11 +36,11 @@ def process_image(image, area_threshold=100, compactness_threshold=0.015, eccent
 
 def save_mask(former_folname, folname, net="deeplab", batch_size=16, num_workers=2):
     # unlabeled dataに対するpred_mean, pred_varを保存
-    makepath = make_datapath_list(former_folname)
-    train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list = makepath.get_list("train_unlabeled")
-    train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=UnlabeledTransform(crop_size=512, flip=False, scaling=False))
+    makepath = make_datapath_list(former_folname, first=True)
+    train_unlabeled_img_list = makepath.get_list("train_unlabeled")
+    train_unlabeled_dataset = UnlabeledDataset2(train_unlabeled_img_list, transform=UnlabeledTransform2(crop_size=512, flip=False, scaling=False))
     train_unlabeled_dataloader = data.DataLoader(
-        train_unlabeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+        train_unlabeled_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -64,7 +64,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=16, num_workers
     model.load_state_dict(torch.load(model_path))
     model.eval()
     with torch.no_grad():
-        for image, mean, var in train_unlabeled_dataloader:
+        for image in train_unlabeled_dataloader:
             image = image.to(device,dtype=torch.float)
 
             # sampling for n times

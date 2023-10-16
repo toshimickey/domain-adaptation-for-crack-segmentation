@@ -7,8 +7,9 @@ from PIL import Image
 
 # define make_datapath_list
 class make_datapath_list():
-  def __init__(self,folname):
+  def __init__(self,folname,first):
     self.folname = folname
+    self.first = first
     img_file_path = sorted(glob.glob('data/Train/images/*'))
     anno_file_path = sorted(glob.glob('data/Train/masks/*'))
 
@@ -18,16 +19,18 @@ class make_datapath_list():
     img_file_path3 = sorted(glob.glob('data/Test/images/*'))
     anno_file_path3 = sorted(glob.glob('data/Test/masks/*'))
 
-    mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean_corrected/*'))
-    var_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_var/*'))
+    if not self.first:
+      mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean_corrected/*'))
+      var_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_var/*'))
 
 
     self.train_labeled_file_path = img_file_path
     self.train_anno_file_path = anno_file_path
 
     self.train_unlabeled_file_path = img_file_path2[:4292]
-    self.train_unlabeled_mean_path = mean_file_path
-    self.train_unlabeled_var_path = var_file_path
+    if not self.first:
+      self.train_unlabeled_mean_path = mean_file_path
+      self.train_unlabeled_var_path = var_file_path
 
     self.val_file_path = img_file_path3
     self.val_anno_file_path = anno_file_path3
@@ -41,8 +44,9 @@ class make_datapath_list():
       anno_path = self.train_anno_file_path
     elif path_type=="train_unlabeled":
       file_path = self.train_unlabeled_file_path
-      mean_path = self.train_unlabeled_mean_path
-      var_path = self.train_unlabeled_var_path
+      if not self.first:
+        mean_path = self.train_unlabeled_mean_path
+        var_path = self.train_unlabeled_var_path
     elif path_type=="val":
       file_path = self.val_file_path
       anno_path = self.val_anno_file_path
@@ -55,13 +59,18 @@ class make_datapath_list():
     var_list = []
     anno_list = []
     if path_type=="train_unlabeled":
-      for path in file_path:
-        img_list.append(path)
-      for path in mean_path:
-        mean_list.append(path)
-      for path in var_path:
-        var_list.append(path)
-      return img_list, mean_list, var_list
+      if not self.first:
+        for path in file_path:
+          img_list.append(path)
+        for path in mean_path:
+          mean_list.append(path)
+        for path in var_path:
+          var_list.append(path)
+        return img_list, mean_list, var_list
+      else:
+        for path in file_path:
+          img_list.append(path)
+        return img_list
     else:
       for path in file_path:
         img_list.append(path)
@@ -183,10 +192,8 @@ class UnlabeledDataset(Dataset):
         # 前処理を適用
         if self.transform:
             image, mean, var = self.transform(image, mean, var)
-
-        return image, mean, var
+            return image, mean, var
     
-
 class UnlabeledTransform():
     def __init__(self, crop_size, flip=True, scaling=True):
         self.crop_size = crop_size
@@ -233,3 +240,59 @@ class UnlabeledTransform():
         var = transforms.ToTensor()(var)
 
         return image, mean, var
+
+
+class UnlabeledDataset2(Dataset):
+    def __init__(self, img_list, transform=None):
+        self.img_list = img_list
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.img_list)
+
+    def __getitem__(self, idx):
+        img_path = self.img_list[idx]
+
+        # 画像を読み込む
+        image = Image.open(img_path).convert('RGB')
+
+        # 前処理を適用
+        if self.transform:
+            image = self.transform(image)
+        return image
+
+class UnlabeledTransform2():
+    def __init__(self, crop_size, flip=True, scaling=True):
+        self.crop_size = crop_size
+        self.flip = flip
+        self.scaling = scaling
+
+    def __call__(self, image):
+        if self.scaling:
+            # # ランダムなスケールを1.0~2.0の中で選択する
+            scale = torch.FloatTensor(1).uniform_(1.0, 2.0)
+
+            w, h = image.size
+            new_width = int(round(w * scale.item()))
+            new_height = int(round(h * scale.item()))
+
+            # # 画像をスケール倍にリサイズする
+            image = transforms.Resize((new_width, new_height))(image)
+
+        # ランダムクロップ
+        i, j, h, w = transforms.RandomCrop.get_params(image, output_size=(self.crop_size, self.crop_size))
+        image = transforms.functional.crop(image, i, j, h, w)
+
+        if self.flip:
+            # 水平反転
+            if random.random() > 0.5:
+                image = transforms.functional.hflip(image)
+
+            # 垂直反転
+            if random.random() > 0.5:
+                image = transforms.functional.vflip(image)
+
+        # テンソルに変換
+        image = transforms.ToTensor()(image)
+
+        return image

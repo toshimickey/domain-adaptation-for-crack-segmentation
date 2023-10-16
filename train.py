@@ -13,19 +13,22 @@ from dataloader.dataset import make_datapath_list, LabeledDataset, LabeledTransf
 
 def train(former_folname, folname, first=False, net="deeplab", batch_size=16, num_workers=2, epochs=300, alpha=1000, beta=10):
     # make dataloader
-    makepath = make_datapath_list(former_folname)
+    makepath = make_datapath_list(former_folname, first)
     train_labeled_img_list, train_labeled_anno_list = makepath.get_list("train_labeled")
-    train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list = makepath.get_list("train_unlabeled")
+    if not first:
+        train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list = makepath.get_list("train_unlabeled")
     val_img_list, val_anno_list = makepath.get_list("val")
 
     train_labeled_dataset = LabeledDataset(train_labeled_img_list, train_labeled_anno_list, transform=LabeledTransform(crop_size=512))
     val_dataset = LabeledDataset(val_img_list, val_anno_list, transform=ValLabeledTransform(crop_size=512))
-    train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=UnlabeledTransform(crop_size=512, flip=True, scaling=True))
+    if not first:
+        train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=UnlabeledTransform(crop_size=512, flip=True, scaling=True))
 
     train_labeled_dataloader = data.DataLoader(
         train_labeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
-    train_unlabeled_dataloader = data.DataLoader(
-        train_unlabeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+    if not first:
+        train_unlabeled_dataloader = data.DataLoader(
+            train_unlabeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
     val_dataloader = data.DataLoader(
         val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 

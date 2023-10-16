@@ -6,7 +6,7 @@ from models.bayesian_deeplab import DeepLabv3plusModel
 from models.bayesian_unet import Unet256
 
 def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers=2):
-    makepath = make_datapath_list(former_folname)
+    makepath = make_datapath_list(former_folname, first=True)
     test_img_list, test_anno_list = makepath.get_list("test")
     test_dataset = LabeledDataset(test_img_list, test_anno_list, transform=ValLabeledTransform(crop_size=512))
     test_dataloader = data.DataLoader(
