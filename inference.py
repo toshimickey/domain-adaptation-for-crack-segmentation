@@ -4,6 +4,7 @@ import torch.utils.data as data
 from dataloader.dataset import make_datapath_list, LabeledDataset, ValLabeledTransform
 from models.bayesian_deeplab import DeepLabv3plusModel
 from models.bayesian_unet import Unet256
+from tqdm import tqdm
 
 def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers=2):
     makepath = make_datapath_list(former_folname, first=True)
@@ -39,7 +40,7 @@ def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers
         scores2 = []
         scores3 = []
         scores4 = []
-        for image,mask in test_dataloader:
+        for image,mask in tqdm(test_dataloader):
             image = image.to(device,dtype=torch.float)
             mask = mask.to(device,dtype=torch.float)
 

@@ -9,6 +9,7 @@ from PIL import Image
 from scipy.ndimage import label
 from skimage import measure
 import torchvision.transforms as transforms
+from tqdm import tqdm
 
 def process_image(image, area_threshold=100, compactness_threshold=0.015, eccentricity_threshold=0.95):
     # 画像を2値化する→この処理はsigmoid有無に関わらずそのままでOK
@@ -66,7 +67,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     model.load_state_dict(torch.load(model_path))
     model.eval()
     with torch.no_grad():
-        for image in train_unlabeled_dataloader:
+        for image in tqdm(train_unlabeled_dataloader):
             image = image.to(device,dtype=torch.float)
 
             # sampling for n times
@@ -100,7 +101,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     latter_path = f'data/unlabeled_mask/{folname}/pred_mean_corrected/'
     files = sorted(os.listdir(former_path))
 
-    for i in range(len(files)):
+    for i in tqdm(range(len(files))):
         image = Image.open(former_path+files[i])
         image = np.array(image)
         image_corrected = process_image(image)
