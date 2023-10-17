@@ -11,7 +11,7 @@ with open(csv_filename, mode='w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(['Iteration', 'F1-Score', 'Accuracy', 'Specificity', 'Recall', 'Precision'])
 
-for i in range(5):
+for i in range(len(folnames)):
     if i==0:
         train(former_folname="hoge", folname=folnames[i], first=True, net="deeplab", epochs=1000)
         scores = inference("hoge", folname=folnames[i], net="deeplab")
