@@ -138,7 +138,10 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
                 print("Early stopping")
                 break
             if earlystopping.counter == 0:
-                print(f"Consistency Loss declined to {earlystopping.best_score}")
+                if not first:
+                    print(f"Consistency Loss declined to {earlystopping.best_score}")
+                else:
+                    print(f"Validation Loss declined to {earlystopping.best_score}")
                 # download to CPU
                 torch.save(model.to('cpu').state_dict(), 'weights/'+folname+'_weights/best.pth')
                 # upload to GPU

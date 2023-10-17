@@ -108,10 +108,13 @@ class LabeledTransform():
         self.crop_size = crop_size
 
     def __call__(self, image, mask):
+        image = transforms.Resize((self.crop_size, self.crop_size))(image)
+        mask = transforms.Resize((self.crop_size, self.crop_size))(mask)
+
+        w,h = image.size
         # # ランダムなスケールを1.0~2.0の中で選択する
         scale = torch.FloatTensor(1).uniform_(1.0, 2.0)
 
-        w, h = image.size
         new_width = int(round(w * scale.item()))
         new_height = int(round(h * scale.item()))
 
@@ -152,13 +155,13 @@ class ValLabeledTransform():
         self.crop_size = crop_size
 
     def __call__(self, image, mask):
-        # リサイズ
-        #image = transforms.Resize(self.resize)(image)
-        #mask = transforms.Resize(self.resize)(mask)
+        
+        image = transforms.Resize((self.crop_size, self.crop_size))(image)
+        mask = transforms.Resize((self.crop_size, self.crop_size))(mask)
 
         # センタークロップ
-        image = transforms.CenterCrop(self.crop_size)(image)
-        mask = transforms.CenterCrop(self.crop_size)(mask)
+        # image = transforms.CenterCrop(self.crop_size)(image)
+        # mask = transforms.CenterCrop(self.crop_size)(mask)
 
         # テンソルに変換
         image = transforms.ToTensor()(image)
