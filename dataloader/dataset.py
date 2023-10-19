@@ -10,14 +10,14 @@ class make_datapath_list():
   def __init__(self,folname,first):
     self.folname = folname
     self.first = first
-    img_file_path = sorted(glob.glob('data/Train/images/*'))
-    anno_file_path = sorted(glob.glob('data/Train/masks/*'))
+    img_file_path = sorted(glob.glob('/content/drive/MyDrive/Master_Research/data/Conglomerate/Train/images/*'))
+    anno_file_path = sorted(glob.glob('/content/drive/MyDrive/Master_Research/data/Conglomerate/Train/masks/*'))
 
-    img_file_path2 = sorted(glob.glob('data/original_split_resized/*'))
-    anno_file_path2 = sorted(glob.glob('data/teacher_split_resized/*'))
+    img_file_path2 = sorted(glob.glob('/content/drive/MyDrive/Master_Research/data/Chundata/original_split_resized/*'))
+    anno_file_path2 = sorted(glob.glob('/content/drive/MyDrive/Master_Research/data/Chundata/teacher_split_resized/*'))
 
-    img_file_path3 = sorted(glob.glob('data/Test/images/*'))
-    anno_file_path3 = sorted(glob.glob('data/Test/masks/*'))
+    img_file_path3 = sorted(glob.glob('/content/drive/MyDrive/Master_Research/data/Conglomerate/Test/images/*'))
+    anno_file_path3 = sorted(glob.glob('/content/drive/MyDrive/Master_Research/data/Conglomerate/Test/masks/*'))
 
     if not self.first:
       mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean_corrected/*'))
