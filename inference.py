@@ -6,10 +6,10 @@ from models.bayesian_deeplab import DeepLabv3plusModel
 from models.bayesian_unet import Unet256
 from tqdm import tqdm
 
-def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers=2):
+def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers=2, crop_size=256):
     makepath = make_datapath_list(former_folname, first=True)
     test_img_list, test_anno_list = makepath.get_list("test")
-    test_dataset = LabeledDataset(test_img_list, test_anno_list, transform=ValLabeledTransform(crop_size=512))
+    test_dataset = LabeledDataset(test_img_list, test_anno_list, transform=ValLabeledTransform(crop_size=crop_size))
     test_dataloader = data.DataLoader(
         test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
@@ -17,7 +17,7 @@ def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers
         model_wrapper = DeepLabv3plusModel()
         model = model_wrapper.get_model()
     else:
-        model = Unet256((3, 512, 512))
+        model = Unet256((3, crop_size, crop_size))
 
     model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

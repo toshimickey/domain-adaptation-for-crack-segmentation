@@ -35,11 +35,11 @@ def process_image(image, area_threshold=100, compactness_threshold=0.015, eccent
     processed_image = np.where(crack_label, image, 0)
     return processed_image
 
-def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers=2):
+def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers=2, crop_size=256):
     # unlabeled dataに対するpred_mean, pred_varを保存
     makepath = make_datapath_list(former_folname, first=True)
     train_unlabeled_img_list = makepath.get_list("train_unlabeled")
-    train_unlabeled_dataset = UnlabeledDataset2(train_unlabeled_img_list, transform=UnlabeledTransform2(crop_size=512, flip=False, scaling=False))
+    train_unlabeled_dataset = UnlabeledDataset2(train_unlabeled_img_list, transform=UnlabeledTransform2(crop_size=crop_size))
     train_unlabeled_dataloader = data.DataLoader(
         train_unlabeled_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
@@ -47,7 +47,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
         model_wrapper = DeepLabv3plusModel()
         model = model_wrapper.get_model()
     else:
-        model = Unet256((3, 512, 512))
+        model = Unet256((3, crop_size, crop_size))
 
     model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
