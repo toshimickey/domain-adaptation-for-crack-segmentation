@@ -86,6 +86,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
                 # image_mean = pred_mean[j].cpu().detach().clamp(0, 1).numpy()*255
                 image_mean = Image.fromarray(image_mean[0].astype('uint8'))
                 image_mean.save(f'data/unlabeled_mask/{folname}/pred_mean/{img_filename[count]}')
+
                 # pred_var[j]をtensor.ptとして保存
                 image_var = pred_var[j][0].cpu()
                 torch.save(image_var, f'data/unlabeled_mask/{folname}/pred_var/{img_filename[count]}'.rstrip('jpg')+'pt')
@@ -93,7 +94,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
                 count += 1
                 if count == len(train_unlabeled_dataset):
                     flag = True
-                break
+                    break
             if flag:
                 break
 

@@ -29,7 +29,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
         train_labeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
     if not first:
         train_unlabeled_dataloader = data.DataLoader(
-            train_unlabeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+            train_unlabeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True, drop_last=True)
     val_dataloader = data.DataLoader(
         val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
