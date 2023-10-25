@@ -31,7 +31,10 @@ def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers
     eval_method4 = Precision()
 
     model.to(device)
-    model_path = f'weights/{folname}_weights/best.pth'
+    parts = folname.split("_")
+    project, iter = parts[0],parts[1]
+
+    model_path = 'weights/'+ project + '/'+ iter +'_weights/best.pth'
     model.load_state_dict(torch.load(model_path))
     model.eval()
     with torch.no_grad():

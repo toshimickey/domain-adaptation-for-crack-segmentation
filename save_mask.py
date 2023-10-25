@@ -12,7 +12,7 @@ import torchvision.transforms as transforms
 from tqdm import tqdm
 
 def process_image(image, area_threshold=100, compactness_threshold=0.015, eccentricity_threshold=0.95):
-    # 画像を2値化する→この処理はsigmoid有無に関わらずそのままでOK
+    # 画像を2値化する
     binary_image = image > 0
 
     # 連結要素のラベリングを行う
@@ -35,7 +35,8 @@ def process_image(image, area_threshold=100, compactness_threshold=0.015, eccent
     processed_image = np.where(crack_label, image, 0)
     return processed_image
 
-def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers=2, crop_size=256):
+
+def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers=2, crop_size=256, pred_max=False):
     # unlabeled dataに対するpred_mean, pred_varを保存
     makepath = make_datapath_list(former_folname, first=True)
     train_unlabeled_img_list = makepath.get_list("train_unlabeled")
@@ -63,7 +64,10 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     count = 0
     flag = False
     model.to(device)
-    model_path = f'weights/{folname}_weights/best.pth'
+    parts = folname.split("_")
+    project, iter = parts[0],parts[1]
+
+    model_path = 'weights/'+ project + '/'+ iter +'_weights/best.pth'
     model.load_state_dict(torch.load(model_path))
     model.eval()
     with torch.no_grad():
@@ -76,14 +80,19 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
                 pred = model.forward(image).unsqueeze(0)
                 preds.append(pred)
             preds = torch.cat(preds)
-            pred_mean = torch.mean(preds, dim=0)
+            
+            # Recall高めるため、サンプルの最大値をpred_meanとする
+            if pred_max:
+                pred_mean = torch.max(preds, dim=0).values
+            else:
+                pred_mean = torch.mean(preds, dim=0)
+
             # pred_varはpredsをsigmoidに通した後に分散をとる
             pred_var = torch.var(torch.sigmoid(preds), dim=0)
 
             for j in range(batch_size):
                 # pred_mean[j]をsigmoidに通してjpgとして保存
                 image_mean = torch.sigmoid(pred_mean[j]).cpu().detach().numpy()*255
-                # image_mean = pred_mean[j].cpu().detach().clamp(0, 1).numpy()*255
                 image_mean = Image.fromarray(image_mean[0].astype('uint8'))
                 image_mean.save(f'data/unlabeled_mask/{folname}/pred_mean/{img_filename[count]}')
 

@@ -53,10 +53,13 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
     start_epoch = 0
     earlystopping = EarlyStopping(patience=50)
 
-    os.makedirs('weights/'+ folname +'_weights', exist_ok=True)
-    os.makedirs('loss/'+ folname +'_loss', exist_ok=True)
+    parts = folname.split("_")
+    project, iter = parts[0],parts[1]
 
-    csv_filename = 'loss/'+folname+'_loss/loss.csv'
+    os.makedirs('weights/'+ project + '/'+ iter +'_weights', exist_ok=True)
+    os.makedirs('loss/'+ project + '/'+ iter +'_loss', exist_ok=True)
+
+    csv_filename = 'loss/'+ project + '/'+ iter +'_loss/loss.csv'
     with open(csv_filename, mode='w', newline='') as file:
         writer = csv.writer(file)
         if first:
@@ -143,10 +146,10 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
                 else:
                     print(f"Validation Loss declined to {earlystopping.best_score}")
                 # download to CPU
-                torch.save(model.to('cpu').state_dict(), 'weights/'+folname+'_weights/best.pth')
+                torch.save(model.to('cpu').state_dict(), 'weights/'+ project + '/'+ iter +'_weights/best.pth')
                 # upload to GPU
                 model = model.to(device)
 
             print(f'Early Stopping Counter = {earlystopping.counter}')
 
-    torch.save(model.to('cpu').state_dict(), 'weights/'+folname+'_weights/last.pth')
+    torch.save(model.to('cpu').state_dict(), 'weights/'+ project + '/'+ iter +'_weights/last.pth')
