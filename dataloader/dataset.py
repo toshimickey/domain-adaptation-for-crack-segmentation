@@ -311,8 +311,8 @@ class make_datapath_list_supervised():
     img_file_path2 = sorted(glob.glob('data/original_split_resized/*'))
     anno_file_path2 = sorted(glob.glob('data/teacher_split_resized/*'))
 
-    self.train_labeled_file_path = img_file_path2[:3500]
-    self.train_anno_file_path = anno_file_path2[:3500]
+    self.train_labeled_file_path = img_file_path[:] + img_file_path2[:3500]
+    self.train_anno_file_path = anno_file_path[:] + anno_file_path2[:3500]
 
     self.val_file_path = img_file_path2[3500:4292]
     self.val_anno_file_path = anno_file_path2[3500:4292]
