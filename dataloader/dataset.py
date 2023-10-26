@@ -300,3 +300,41 @@ class UnlabeledTransform2():
         image = transforms.ToTensor()(image)
 
         return image
+    
+
+# define datapath for fully supervised learning
+class make_datapath_list_supervised():
+  def __init__(self):
+    img_file_path = sorted(glob.glob('data/Train/images/*'))
+    anno_file_path = sorted(glob.glob('data/Train/masks/*'))
+
+    img_file_path2 = sorted(glob.glob('data/original_split_resized/*'))
+    anno_file_path2 = sorted(glob.glob('data/teacher_split_resized/*'))
+
+    self.train_labeled_file_path = img_file_path2[:3500]
+    self.train_anno_file_path = anno_file_path2[:3500]
+
+    self.val_file_path = img_file_path2[3500:4292]
+    self.val_anno_file_path = anno_file_path2[3500:4292]
+
+    self.test_file_path = img_file_path2[4292:5292]
+    self.test_anno_file_path = anno_file_path2[4292:5292]
+
+  def get_list(self, path_type):
+    if path_type=="train_labeled":
+      file_path = self.train_labeled_file_path
+      anno_path = self.train_anno_file_path
+    elif path_type=="val":
+      file_path = self.val_file_path
+      anno_path = self.val_anno_file_path
+    else:
+      file_path = self.test_file_path
+      anno_path = self.test_anno_file_path
+
+    img_list = []
+    anno_list = []
+    for path in file_path:
+      img_list.append(path)
+    for path in anno_path:
+      anno_list.append(path)
+    return img_list, anno_list

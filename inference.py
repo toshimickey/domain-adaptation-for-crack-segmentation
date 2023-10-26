@@ -1,13 +1,16 @@
 from utils.segmentation_eval import DiceScore, Accuracy, Precision, Recall, Specificity
 import torch
 import torch.utils.data as data
-from dataloader.dataset import make_datapath_list, LabeledDataset, ValLabeledTransform
+from dataloader.dataset import make_datapath_list, make_datapath_list_supervised, LabeledDataset, ValLabeledTransform
 from models.bayesian_deeplab import DeepLabv3plusModel
 from models.bayesian_unet import Unet256
 from tqdm import tqdm
 
-def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers=2, crop_size=256):
-    makepath = make_datapath_list(former_folname, first=True)
+def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers=2, crop_size=256, supervised=False):
+    if not supervised:
+        makepath = make_datapath_list(former_folname, first=True)
+    else:
+        makepath = make_datapath_list_supervised()
     test_img_list, test_anno_list = makepath.get_list("test")
     test_dataset = LabeledDataset(test_img_list, test_anno_list, transform=ValLabeledTransform(crop_size=crop_size))
     test_dataloader = data.DataLoader(

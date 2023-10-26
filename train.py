@@ -9,12 +9,15 @@ from utils.loss_function import DiceBCELoss, BayesBCELoss
 from models.bayesian_deeplab import DeepLabv3plusModel
 from models.bayesian_unet import Unet256
 from utils.module import EarlyStopping, write_to_csv
-from dataloader.dataset import make_datapath_list, LabeledDataset, LabeledTransform, ValLabeledTransform, UnlabeledDataset, UnlabeledTransform
+from dataloader.dataset import make_datapath_list, make_datapath_list_supervised, LabeledDataset, LabeledTransform, ValLabeledTransform, UnlabeledDataset, UnlabeledTransform
 
 
-def train(former_folname, folname, first=False, net="deeplab", batch_size=64, num_workers=2, epochs=300, alpha=100, beta=10, crop_size=256):
+def train(former_folname, folname, first=False, net="deeplab", batch_size=64, num_workers=2, epochs=300, alpha=100, beta=10, crop_size=256, supervised=False):
     # make dataloader
-    makepath = make_datapath_list(former_folname, first)
+    if not supervised:
+        makepath = make_datapath_list(former_folname, first)
+    else:
+        makepath = make_datapath_list_supervised()
     train_labeled_img_list, train_labeled_anno_list = makepath.get_list("train_labeled")
     if not first:
         train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list = makepath.get_list("train_unlabeled")
