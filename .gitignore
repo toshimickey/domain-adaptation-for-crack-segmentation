@@ -2,3 +2,5 @@
 /zipdata/
 /data/
 /weights/
+/__pycache__/
+.DS_Store
