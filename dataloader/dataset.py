@@ -1,4 +1,4 @@
-import glob
+import glob, os
 import random
 import torch
 from torch.utils.data import Dataset
@@ -15,6 +15,12 @@ class make_datapath_list():
 
     img_file_path2 = sorted(glob.glob('data/original_split_resized/*'))
     anno_file_path2 = sorted(glob.glob('data/teacher_split_resized/*'))
+
+    with open("shuffle_indices.txt", "r") as file:
+        shuffle_indices = list(map(int, file.read().split()))
+    # ランダムな並びを使用してリストを再構築
+    img_file_path2 = [img_file_path2[i] for i in shuffle_indices]
+    anno_file_path2 = [anno_file_path2[i] for i in shuffle_indices]
 
     img_file_path3 = sorted(glob.glob('data/Test/images/*'))
     anno_file_path3 = sorted(glob.glob('data/Test/masks/*'))
@@ -62,10 +68,12 @@ class make_datapath_list():
       if not self.first:
         for path in file_path:
           img_list.append(path)
-        for path in mean_path:
-          mean_list.append(path)
-        for path in var_path:
-          var_list.append(path)
+          base_name = os.path.splitext(os.path.basename(path))[0]
+          matching_mean_path = [mp for mp in mean_path if os.path.splitext(os.path.basename(mp))[0] == base_name]
+          matching_var_path = [vp for vp in var_path if os.path.splitext(os.path.basename(vp))[0] == base_name]
+
+          mean_list.append(matching_mean_path[0])
+          var_list.append(matching_var_path[0])
         return img_list, mean_list, var_list
       else:
         for path in file_path:
@@ -310,6 +318,12 @@ class make_datapath_list_supervised():
 
     img_file_path2 = sorted(glob.glob('data/original_split_resized/*'))
     anno_file_path2 = sorted(glob.glob('data/teacher_split_resized/*'))
+
+    with open("shuffle_indices.txt", "r") as file:
+      shuffle_indices = list(map(int, file.read().split()))
+    # ランダムな並びを使用してリストを再構築
+    img_file_path2 = [img_file_path2[i] for i in shuffle_indices]
+    anno_file_path2 = [anno_file_path2[i] for i in shuffle_indices]
 
     self.train_labeled_file_path = img_file_path[:] + img_file_path2[:3500]
     self.train_anno_file_path = anno_file_path[:] + anno_file_path2[:3500]
