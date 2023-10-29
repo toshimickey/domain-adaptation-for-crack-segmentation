@@ -79,7 +79,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
         running_train_loss = []
         running_train_cons_loss = []
         model.train()
-        for image,mask in tqdm(train_labeled_dataloader):
+        for image,mask in train_labeled_dataloader:
             image = image.to(device,dtype=torch.float)
             mask = mask.to(device,dtype=torch.float)
             pred_mask = model.forward(image)
@@ -90,7 +90,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
             running_train_loss.append(loss.item())
         
         if not first:
-            for image, mean, var in tqdm(train_unlabeled_dataloader):
+            for image, mean, var in train_unlabeled_dataloader:
                 image = image.to(device,dtype=torch.float)
                 mean = mean.to(device,dtype=torch.float)
                 var = var.to(device,dtype=torch.float)
@@ -105,7 +105,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
         running_val_loss = []
         model.eval()
         with torch.no_grad():
-            for image,mask in tqdm(val_dataloader):
+            for image,mask in val_dataloader:
                 image = image.to(device,dtype=torch.float)
                 mask = mask.to(device,dtype=torch.float)
                 pred_mask = model.forward(image)
@@ -113,14 +113,14 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
                 running_val_loss.append(loss.item())
 
         epoch_train_loss = np.mean(running_train_loss)
-        print('Train loss: {}'.format(epoch_train_loss))
+        #print('Train loss: {}'.format(epoch_train_loss))
 
         if not first:
             epoch_train_cons_loss = np.mean(running_train_cons_loss)
-            print('Train consistency loss: {}'.format(epoch_train_cons_loss))
+            #print('Train consistency loss: {}'.format(epoch_train_cons_loss))
 
         epoch_val_loss = np.mean(running_val_loss)
-        print('Validation loss: {}'.format(epoch_val_loss))
+        #print('Validation loss: {}'.format(epoch_val_loss))
 
         # saving loss in csv
         if first:

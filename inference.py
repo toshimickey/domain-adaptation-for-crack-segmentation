@@ -78,10 +78,10 @@ def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers
     recall = torch.mean(scores3).item()
     precision = torch.mean(scores4).item()
 
-    print(f'F1-Score : {f1score}')
-    print(f'Accuracy : {accuracy}')
-    print(f'Specificity : {specificity}')
-    print(f'Recall : {recall}')
-    print(f'Precision : {precision}')
+    # print(f'F1-Score : {f1score}')
+    # print(f'Accuracy : {accuracy}')
+    # print(f'Specificity : {specificity}')
+    # print(f'Recall : {recall}')
+    # print(f'Precision : {precision}')
 
     return [f1score, accuracy, specificity, recall, precision]
