@@ -9,31 +9,31 @@ class VAE(nn.Module):
         # エンコーダー
         self.encoder = nn.Sequential(
             # 3,32,32→8,16,16
-            nn.Conv2d(3, 8, kernel_size=4, stride=2, padding=1),
+            nn.Conv2d(3, 4, kernel_size=4, stride=2, padding=1),
             nn.ReLU(True),
             # 8,16,16→16,8,8
-            nn.Conv2d(8, 16, kernel_size=4, stride=2, padding=1),
+            nn.Conv2d(4, 8, kernel_size=4, stride=2, padding=1),
             nn.ReLU(True),
             # 16,8,8→32,4,4
-            nn.Conv2d(16, 32, kernel_size=4, stride=2, padding=1),
+            nn.Conv2d(8, 16, kernel_size=4, stride=2, padding=1),
             nn.ReLU(True)
         )
         
-        self.fc_mu = nn.Linear(32 * 4 * 4, latent_dim)
-        self.fc_logvar = nn.Linear(32 * 4 * 4, latent_dim)
+        self.fc_mu = nn.Linear(16 * 4 * 4, latent_dim)
+        self.fc_logvar = nn.Linear(16 * 4 * 4, latent_dim)
 
         self.decoder1 = nn.Sequential(
-            nn.Linear(latent_dim, 32 * 4 * 4),
+            nn.Linear(latent_dim, 16 * 4 * 4),
             nn.ReLU(True)
         )
 
         # デコーダー
         self.decoder2 = nn.Sequential(
-            nn.ConvTranspose2d(32, 16, kernel_size=4, stride=2, padding=1),
-            nn.ReLU(True),
             nn.ConvTranspose2d(16, 8, kernel_size=4, stride=2, padding=1),
             nn.ReLU(True),
-            nn.ConvTranspose2d(8, 3, kernel_size=4, stride=2, padding=1),
+            nn.ConvTranspose2d(8, 4, kernel_size=4, stride=2, padding=1),
+            nn.ReLU(True),
+            nn.ConvTranspose2d(4, 3, kernel_size=4, stride=2, padding=1),
             nn.Sigmoid()
         )
 
@@ -53,7 +53,7 @@ class VAE(nn.Module):
         z = self.reparameterize(mu, logvar)
 
         x = self.decoder1(z)
-        x = x.view(x.size(0), 32, 4, 4)
+        x = x.view(x.size(0), 16, 4, 4)
         x = self.decoder2(x)
         return x, mu, logvar, z
 
