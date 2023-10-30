@@ -16,13 +16,16 @@ class VAE(nn.Module):
             nn.ReLU(True)
         )
         
-        self.fc_mu = nn.Linear(128 * 16 * 16, latent_dim)
-        self.fc_logvar = nn.Linear(128 * 16 * 16, latent_dim)
+        self.fc_mu = nn.Linear(128 * 32 * 32, latent_dim)
+        self.fc_logvar = nn.Linear(128 * 32 * 32, latent_dim)
+
+        self.decoder1 = nn.Sequential(
+            nn.Linear(latent_dim, 128 * 32 * 32),
+            nn.ReLU(True)
+        )
 
         # デコーダー
-        self.decoder = nn.Sequential(
-            nn.Linear(latent_dim, 128 * 16 * 16),
-            nn.ReLU(True),
+        self.decoder2 = nn.Sequential(
             nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1),
             nn.ReLU(True),
             nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1),
@@ -45,8 +48,10 @@ class VAE(nn.Module):
         logvar = self.fc_logvar(x)
         
         z = self.reparameterize(mu, logvar)
-        
-        x = self.decoder(z)
+
+        x = self.decoder1(z)
+        x = x.view(x.size(0), 128, 32, 32)
+        x = self.decoder2(x)
         return x, mu, logvar, z
 
 
