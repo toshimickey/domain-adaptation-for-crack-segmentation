@@ -3,7 +3,7 @@ import torch.utils.data as data
 from dataloader.dataset import make_datapath_list, UnlabeledDataset2, UnlabeledTransform2
 from models.bayesian_deeplab import DeepLabv3plusModel
 from models.bayesian_unet import Unet256
-import os
+import os, glob
 import numpy as np
 from PIL import Image
 from scipy.ndimage import label
@@ -54,10 +54,12 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
 
-    with open("shuffle_indices.txt", "r") as file:
-        shuffle_indices = list(map(int, file.read().split()))
-    img_filename = sorted(os.listdir('data/original_split_resized'))
-    img_filename = [img_filename[i] for i in shuffle_indices]
+    # with open("shuffle_indices.txt", "r") as file:
+    #     shuffle_indices = list(map(int, file.read().split()))
+    # img_filename = sorted(os.listdir('data/original_split_resized'))
+    # img_filename = [img_filename[i] for i in shuffle_indices]
+    img_file_path = sorted(glob.glob('data/Test/images/Rissbilder*'))
+    img_filename = [file.lstrip('data/Test/images/') for file in img_file_path]
 
     os.makedirs(f'data/unlabeled_mask/{folname}/pred_mean')
     os.makedirs(f'data/unlabeled_mask/{folname}/pred_mean_corrected')
