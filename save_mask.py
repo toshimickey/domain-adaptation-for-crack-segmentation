@@ -58,8 +58,8 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     #     shuffle_indices = list(map(int, file.read().split()))
     # img_filename = sorted(os.listdir('data/original_split_resized'))
     # img_filename = [img_filename[i] for i in shuffle_indices]
-    img_file_path = sorted(glob.glob('data/Test/images/Rissbilder*'))
-    img_filename = [file.lstrip('data/Test/images/') for file in img_file_path]
+    img_file_path = sorted(glob.glob('data/Train/images/Rissbilder*'))
+    img_filename = [file.lstrip('data/Train/images/') for file in img_file_path]
 
     os.makedirs(f'data/unlabeled_mask/{folname}/pred_mean')
     os.makedirs(f'data/unlabeled_mask/{folname}/pred_mean_corrected')
