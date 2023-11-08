@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 from PIL import Image
+import numpy as np
 
 # Unlabeled → Rissbilder
 class make_datapath_list():
@@ -391,23 +392,22 @@ class make_datapath_list_supervised():
     img_file_path = sorted(glob.glob('data/Train/images/*'))
     anno_file_path = sorted(glob.glob('data/Train/masks/*'))
 
-    img_file_path2 = sorted(glob.glob('data/original_split_resized/*'))
-    anno_file_path2 = sorted(glob.glob('data/teacher_split_resized/*'))
+    indices = np.arange(len(img_file_path))
+    np.random.shuffle(indices)
+    img_file_path = [img_file_path[i] for i in indices]
+    anno_file_path = [anno_file_path[i] for i in indices]
+    
+    img_file_path2 = sorted(glob.glob('data/Test/images/Rissbilder*'))
+    anno_file_path2 = sorted(glob.glob('data/Test/masks/Rissbilder*'))
 
-    with open("shuffle_indices.txt", "r") as file:
-      shuffle_indices = list(map(int, file.read().split()))
-    # ランダムな並びを使用してリストを再構築
-    img_file_path2 = [img_file_path2[i] for i in shuffle_indices]
-    anno_file_path2 = [anno_file_path2[i] for i in shuffle_indices]
+    self.train_labeled_file_path = img_file_path[:8000]
+    self.train_anno_file_path = anno_file_path[:8000]
 
-    self.train_labeled_file_path = img_file_path[:] + img_file_path2[:3500]
-    self.train_anno_file_path = anno_file_path[:] + anno_file_path2[:3500]
+    self.val_file_path = img_file_path[8000:9899]
+    self.val_anno_file_path = anno_file_path[8000:9899]
 
-    self.val_file_path = img_file_path2[3500:4292]
-    self.val_anno_file_path = anno_file_path2[3500:4292]
-
-    self.test_file_path = img_file_path2[4292:5292]
-    self.test_anno_file_path = anno_file_path2[4292:5292]
+    self.test_file_path = img_file_path2
+    self.test_anno_file_path = anno_file_path2
 
   def get_list(self, path_type):
     if path_type=="train_labeled":
@@ -427,3 +427,45 @@ class make_datapath_list_supervised():
     for path in anno_path:
       anno_list.append(path)
     return img_list, anno_list
+
+# class make_datapath_list_supervised():
+#   def __init__(self):
+#     img_file_path = sorted(glob.glob('data/Train/images/*'))
+#     anno_file_path = sorted(glob.glob('data/Train/masks/*'))
+
+#     img_file_path2 = sorted(glob.glob('data/original_split_resized/*'))
+#     anno_file_path2 = sorted(glob.glob('data/teacher_split_resized/*'))
+
+#     with open("shuffle_indices.txt", "r") as file:
+#       shuffle_indices = list(map(int, file.read().split()))
+#     # ランダムな並びを使用してリストを再構築
+#     img_file_path2 = [img_file_path2[i] for i in shuffle_indices]
+#     anno_file_path2 = [anno_file_path2[i] for i in shuffle_indices]
+
+#     self.train_labeled_file_path = img_file_path[:] + img_file_path2[:3500]
+#     self.train_anno_file_path = anno_file_path[:] + anno_file_path2[:3500]
+
+#     self.val_file_path = img_file_path2[3500:4292]
+#     self.val_anno_file_path = anno_file_path2[3500:4292]
+
+#     self.test_file_path = img_file_path2[4292:5292]
+#     self.test_anno_file_path = anno_file_path2[4292:5292]
+
+#   def get_list(self, path_type):
+#     if path_type=="train_labeled":
+#       file_path = self.train_labeled_file_path
+#       anno_path = self.train_anno_file_path
+#     elif path_type=="val":
+#       file_path = self.val_file_path
+#       anno_path = self.val_anno_file_path
+#     else:
+#       file_path = self.test_file_path
+#       anno_path = self.test_anno_file_path
+
+#     img_list = []
+#     anno_list = []
+#     for path in file_path:
+#       img_list.append(path)
+#     for path in anno_path:
+#       anno_list.append(path)
+#     return img_list, anno_list
