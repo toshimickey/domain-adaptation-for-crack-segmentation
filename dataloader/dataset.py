@@ -185,13 +185,15 @@ class LabeledDataset(Dataset):
             image, label = self.transform(image, label)
 
         return image, label
-    
+      
 
 class LabeledTransform():
     def __init__(self, crop_size):
         self.crop_size = crop_size
 
     def __call__(self, image, mask):
+        image = transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2)(image)
+      
         image = transforms.Resize((self.crop_size, self.crop_size))(image)
         mask = transforms.Resize((self.crop_size, self.crop_size))(mask)
 
@@ -222,9 +224,9 @@ class LabeledTransform():
             mask = transforms.functional.vflip(mask)
 
         # # -20~20のランダム回転
-        # angle = random.randint(-20, 20)
-        # image = transforms.functional.rotate(image,angle)
-        # mask = transforms.functional.rotate(mask,angle)
+        angle = random.randint(-20, 20)
+        image = transforms.functional.rotate(image,angle)
+        mask = transforms.functional.rotate(mask,angle)
 
         # テンソルに変換
         image = transforms.ToTensor()(image)
@@ -287,6 +289,8 @@ class UnlabeledTransform():
         self.crop_size = crop_size
 
     def __call__(self, image, mean, var):
+        image = transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2)(image)
+      
         image = transforms.Resize((self.crop_size, self.crop_size))(image)
         mean = transforms.Resize((self.crop_size, self.crop_size))(mean)
         var = transforms.Resize((self.crop_size, self.crop_size))(var)
@@ -321,6 +325,11 @@ class UnlabeledTransform():
             image = transforms.functional.vflip(image)
             mean = transforms.functional.vflip(mean)
             var = transforms.functional.vflip(var)
+            
+        angle = random.randint(-20, 20)
+        image = transforms.functional.rotate(image,angle)
+        mean = transforms.functional.rotate(mean,angle)
+        var = transforms.functional.rotate(var,angle)
 
         # テンソルに変換
         image = transforms.ToTensor()(image)
@@ -400,11 +409,11 @@ class make_datapath_list_supervised():
     img_file_path2 = sorted(glob.glob('data/Test/images/Rissbilder*'))
     anno_file_path2 = sorted(glob.glob('data/Test/masks/Rissbilder*'))
 
-    self.train_labeled_file_path = img_file_path[:2500]
-    self.train_anno_file_path = anno_file_path[:2500]
+    self.train_labeled_file_path = img_file_path[:3000]
+    self.train_anno_file_path = anno_file_path[:3000]
 
-    self.val_file_path = img_file_path[2500:3000]
-    self.val_anno_file_path = anno_file_path[2500:3000]
+    self.val_file_path = img_file_path[3000:3440]
+    self.val_anno_file_path = anno_file_path[3000:3440]
 
     self.test_file_path = img_file_path2
     self.test_anno_file_path = anno_file_path2
