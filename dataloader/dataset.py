@@ -389,8 +389,8 @@ class UnlabeledTransform2():
 # define datapath for fully supervised learning
 class make_datapath_list_supervised():
   def __init__(self):
-    img_file_path = sorted(glob.glob('data/Train/images/*'))
-    anno_file_path = sorted(glob.glob('data/Train/masks/*'))
+    img_file_path = sorted(glob.glob('data/Train/images/Rissbilder*'))
+    anno_file_path = sorted(glob.glob('data/Train/masks/Rissbilder*'))
 
     indices = np.arange(len(img_file_path))
     np.random.shuffle(indices)
@@ -400,11 +400,11 @@ class make_datapath_list_supervised():
     img_file_path2 = sorted(glob.glob('data/Test/images/Rissbilder*'))
     anno_file_path2 = sorted(glob.glob('data/Test/masks/Rissbilder*'))
 
-    self.train_labeled_file_path = img_file_path[:8000]
-    self.train_anno_file_path = anno_file_path[:8000]
+    self.train_labeled_file_path = img_file_path[:2500]
+    self.train_anno_file_path = anno_file_path[:2500]
 
-    self.val_file_path = img_file_path[8000:9899]
-    self.val_anno_file_path = anno_file_path[8000:9899]
+    self.val_file_path = img_file_path[2500:3000]
+    self.val_anno_file_path = anno_file_path[2500:3000]
 
     self.test_file_path = img_file_path2
     self.test_anno_file_path = anno_file_path2
