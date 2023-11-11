@@ -36,7 +36,7 @@ def process_image(image, area_threshold=100, compactness_threshold=0.015, eccent
     return processed_image
 
 
-def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers=2, crop_size=256, pred_max=False):
+def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers=2, crop_size=256, pred_max=False, save_num=None):
     # unlabeled dataに対するpred_mean, pred_varを保存
     makepath = make_datapath_list(former_folname, first=True)
     train_unlabeled_img_list = makepath.get_list("train_unlabeled")
@@ -60,6 +60,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     # img_filename = [img_filename[i] for i in shuffle_indices]
     img_file_path = sorted(glob.glob('data/Train/images/Rissbilder*'))
     img_filename = [file.lstrip('data/Train/images/') for file in img_file_path]
+    confidence_list = []
 
     os.makedirs(f'data/unlabeled_mask/{folname}/pred_mean')
     os.makedirs(f'data/unlabeled_mask/{folname}/pred_mean_corrected')
@@ -91,6 +92,11 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
                 pred_mean = torch.max(preds, dim=0).values
             else:
                 pred_mean = torch.mean(preds, dim=0)
+            
+            # confidence listに確信度を格納 pred_mean (64,1,256,256)
+            pred_conf = torch.max(pred_mean, 1-pred_mean).view(pred_mean.size(0), -1)
+            confidence = torch.mean(pred_conf, dim=1).tolist()
+            confidence_list = confidence_list + confidence
 
             # pred_varはpredsをsigmoidに通した後に分散をとる
             pred_var = torch.var(torch.sigmoid(preds), dim=0)
@@ -111,7 +117,18 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
                     break
             if flag:
                 break
-
+    
+    # confidenceの大きいデータsave_num個以外を削除
+    if save_num is not None:
+        indexed_confidence = list(enumerate(confidence_list))
+        sorted_confidence = sorted(indexed_confidence, key=lambda x: x[1], reverse=True)
+        # indicesはconfidenceの小さいデータ
+        indices = [index for index, _ in sorted_confidence[save_num:]]
+        for index in indices:
+            os.remove(f'data/unlabeled_mask/{folname}/pred_mean/{img_filename[index]}')
+            os.remove(f'data/unlabeled_mask/{folname}/pred_var/{img_filename[index]}'.rstrip('jpg')+'pt')
+    
+    
     former_path = f'data/unlabeled_mask/{folname}/pred_mean/'
     latter_path = f'data/unlabeled_mask/{folname}/pred_mean_corrected/'
     files = sorted(os.listdir(former_path))

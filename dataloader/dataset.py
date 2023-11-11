@@ -62,9 +62,12 @@ class make_datapath_list():
     var_list = []
     anno_list = []
     if path_type=="train_unlabeled":
+      ##　imgをmean, varに存在する分だけ格納
       if not self.first:
+        filenames = [path.lstrip(f'data/unlabeled_mask/{self.folname}/pred_mean_corrected/').rstrip('.jpg') for path in mean_path]
         for path in file_path:
-          img_list.append(path)
+          if path.lstrip('data/Train/images/').rstrip('.jpg') in filenames:
+            img_list.append(path)
         for path in mean_path:
           mean_list.append(path)
         for path in var_path:
@@ -192,7 +195,7 @@ class LabeledTransform():
         self.crop_size = crop_size
 
     def __call__(self, image, mask):
-        image = transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2)(image)
+        # image = transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2)(image)
       
         image = transforms.Resize((self.crop_size, self.crop_size))(image)
         mask = transforms.Resize((self.crop_size, self.crop_size))(mask)
@@ -223,10 +226,10 @@ class LabeledTransform():
             image = transforms.functional.vflip(image)
             mask = transforms.functional.vflip(mask)
 
-        # # -20~20のランダム回転
-        angle = random.randint(-20, 20)
-        image = transforms.functional.rotate(image,angle)
-        mask = transforms.functional.rotate(mask,angle)
+        # # # -20~20のランダム回転
+        # angle = random.randint(-20, 20)
+        # image = transforms.functional.rotate(image,angle)
+        # mask = transforms.functional.rotate(mask,angle)
 
         # テンソルに変換
         image = transforms.ToTensor()(image)
@@ -289,7 +292,7 @@ class UnlabeledTransform():
         self.crop_size = crop_size
 
     def __call__(self, image, mean, var):
-        image = transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2)(image)
+        # image = transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2)(image)
       
         image = transforms.Resize((self.crop_size, self.crop_size))(image)
         mean = transforms.Resize((self.crop_size, self.crop_size))(mean)
@@ -326,10 +329,10 @@ class UnlabeledTransform():
             mean = transforms.functional.vflip(mean)
             var = transforms.functional.vflip(var)
             
-        angle = random.randint(-20, 20)
-        image = transforms.functional.rotate(image,angle)
-        mean = transforms.functional.rotate(mean,angle)
-        var = transforms.functional.rotate(var,angle)
+        # angle = random.randint(-20, 20)
+        # image = transforms.functional.rotate(image,angle)
+        # mean = transforms.functional.rotate(mean,angle)
+        # var = transforms.functional.rotate(var,angle)
 
         # テンソルに変換
         image = transforms.ToTensor()(image)
