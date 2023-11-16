@@ -144,16 +144,15 @@ class make_datapath_list():
     anno_list = []
     if path_type=="train_unlabeled":
       if not self.first:
-        filenames = [path.lstrip(f'data/unlabeled_mask/{self.folname}/pred_mean_corrected/').rstrip('.jpg') for path in mean_path]
+        filenames = [mp.replace(f'data/unlabeled_mask/{self.folname}/pred_mean_corrected/', '').rstrip('.jpg') for mp in mean_path]
         for path in file_path:
           # mean path内のファイルと同じ名前のファイルだけリストに格納
           if path.lstrip('data/original_split_resized/').rstrip('.jpg') in filenames:
             img_list.append(path)
-            base_name = os.path.splitext(os.path.basename(path))[0]
-            matching_mean_path = [mp for mp in mean_path if os.path.splitext(os.path.basename(mp))[0] == base_name]
-            matching_var_path = [vp for vp in var_path if os.path.splitext(os.path.basename(vp))[0] == base_name]
-            mean_list.append(matching_mean_path[0])
-            var_list.append(matching_var_path[0])
+        for path in mean_path:
+          mean_list.append(path)
+        for path in var_path:
+          var_list.append(path)
         return img_list, mean_list, var_list
       else:
         for path in file_path:
