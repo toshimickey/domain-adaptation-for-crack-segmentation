@@ -84,12 +84,12 @@ import numpy as np
 #         anno_list.append(path)
 #       return img_list, anno_list
 
-## Unlabeled → Chundata
+## Unlabeled → Chundata (cyclegan)
 class make_datapath_list():
   def __init__(self,folname,first):
     self.folname = folname
     self.first = first
-    img_file_path = sorted(glob.glob('data/Train/images/*'))
+    img_file_path = sorted(glob.glob('data/Train_transform/images/*'))
     anno_file_path = sorted(glob.glob('data/Train/masks/*'))
 
     img_file_path2 = sorted(glob.glob('data/original_split_resized/*'))
@@ -101,7 +101,7 @@ class make_datapath_list():
     img_file_path2 = [img_file_path2[i] for i in shuffle_indices]
     anno_file_path2 = [anno_file_path2[i] for i in shuffle_indices]
 
-    img_file_path3 = sorted(glob.glob('data/Test/images/*'))
+    img_file_path3 = sorted(glob.glob('data/Test_transform/images/*'))
     anno_file_path3 = sorted(glob.glob('data/Test/masks/*'))
 
     if not self.first:
@@ -398,7 +398,7 @@ class UnlabeledTransform2():
         return image
     
 
-# # define datapath for fully supervised learning
+# # define datapath for fully supervised learning (Rissbilder)
 # class make_datapath_list_supervised():
 #   def __init__(self):
 #     img_file_path = sorted(glob.glob('data/Train/images/Rissbilder*'))
