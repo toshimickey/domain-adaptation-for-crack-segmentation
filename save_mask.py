@@ -57,7 +57,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     # img_filename = sorted(os.listdir('data/original_split_resized'))
     # img_filename = sorted(img_filename, key=lambda x: (int(x.split('_')[0].lstrip('c')), int(x.split('_')[1])))
     
-    img_file_path = sorted(glob.glob('data/Train/images/Rissbilder*'))
+    img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
     img_filename = [file.lstrip('data/Train/images/') for file in img_file_path]
     confidence_list = []
 

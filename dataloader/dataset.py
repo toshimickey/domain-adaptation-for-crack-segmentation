@@ -11,17 +11,17 @@ class make_datapath_list():
   def __init__(self,folname,first):
     self.folname = folname
     self.first = first
-    img_file_path = sorted(glob.glob('data/Train/images/Rissbilder*'))
-    anno_file_path = sorted(glob.glob('data/Train/masks/Rissbilder*'))
+    img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
+    anno_file_path = sorted(glob.glob('data/Train/masks/Volker*'))
     
-    img_file_path2 = sorted(glob.glob('data/Train_transform2/images/[!Rissbilder]*'))
-    anno_file_path2 = sorted(glob.glob('data/Train/masks/[!Rissbilder]*'))
+    img_file_path2 = sorted(glob.glob('data/Train/images/[!Volker]*'))
+    anno_file_path2 = sorted(glob.glob('data/Train/masks/[!Volker]*'))
     
-    img_file_path3 = sorted(glob.glob('data/Test/images/Rissbilder*'))
-    anno_file_path3 = sorted(glob.glob('data/Test/masks/Rissbilder*'))
+    img_file_path3 = sorted(glob.glob('data/Test/images/Volker*'))
+    anno_file_path3 = sorted(glob.glob('data/Test/masks/Volker*'))
 
-    img_file_path4 = sorted(glob.glob('data/Test_transform2/images/[!Rissbilder]*'))
-    anno_file_path4 = sorted(glob.glob('data/Test/masks/[!Rissbilder]*'))
+    img_file_path4 = sorted(glob.glob('data/Test/images/[!Volker]*'))
+    anno_file_path4 = sorted(glob.glob('data/Test/masks/[!Volker]*'))
 
     if not self.first:
       mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean_corrected/*'))
