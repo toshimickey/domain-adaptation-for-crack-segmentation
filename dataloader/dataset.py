@@ -6,7 +6,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 import numpy as np
 
-# # Unlabeled → Rissbilder
+# # Unlabeled → volker
 class make_datapath_list():
   def __init__(self,folname,first):
     self.folname = folname
@@ -22,21 +22,27 @@ class make_datapath_list():
 
     img_file_path4 = sorted(glob.glob('data/Test/images/[!Volker]*'))
     anno_file_path4 = sorted(glob.glob('data/Test/masks/[!Volker]*'))
+    
+    img_file_path5 = sorted(glob.glob('data/original_split_resized/*'))
+    anno_file_path5 = sorted(glob.glob('data/teacher_split_resized/*'))
+    
+    img_file_path5 = sorted(img_file_path5, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
+    anno_file_path5 = sorted(anno_file_path5, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
 
     if not self.first:
       mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean_corrected/*'))
       var_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_var/*'))
 
-    self.train_labeled_file_path = img_file_path2
-    self.train_anno_file_path = anno_file_path2
+    self.train_labeled_file_path = img_file_path2+img_file_path5[:4212]
+    self.train_anno_file_path = anno_file_path2+anno_file_path5[:4212]
 
     self.train_unlabeled_file_path = img_file_path
     if not self.first:
       self.train_unlabeled_mean_path = mean_file_path
       self.train_unlabeled_var_path = var_file_path
 
-    self.val_file_path = img_file_path4
-    self.val_anno_file_path = anno_file_path4
+    self.val_file_path = img_file_path4+img_file_path5[4212:5292]
+    self.val_anno_file_path = anno_file_path4+anno_file_path5[4212:5292]
 
     self.test_file_path = img_file_path3
     self.test_anno_file_path = anno_file_path3
