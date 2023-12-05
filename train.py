@@ -60,7 +60,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
 
     start_epoch = 0
-    earlystopping = EarlyStopping(patience=300)
+    earlystopping = EarlyStopping(patience=50)
 
     parts = folname.split("_")
     project, iter = parts[0],parts[1]

@@ -47,7 +47,7 @@ class StackDecoder(nn.Module):
             _, channels, height, width = down_tensor.size()
             ##### insert dropout  #####
             x = F.dropout(x,p=0.3,training=True)
-            x = F.upsample(x, size=(height, width), mode='bilinear')
+            x = F.interpolate(x, size=(height, width), mode='bilinear')
             x = torch.cat([x, down_tensor], 1)  #combining channels of  input from encoder and upsampling input
             x = self.block(x)
             return x
