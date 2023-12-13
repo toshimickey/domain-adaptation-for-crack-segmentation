@@ -5,14 +5,14 @@ import csv
 import torch
 import torch.utils.data as data
 from tqdm import tqdm
-from utils.loss_function import DiceBCELoss, BayesBCELoss
+from utils.loss_function import DiceBCELoss, BayesBCELoss, RMSELoss
 from models.bayesian_deeplab import DeepLabv3plusModel
 from models.bayesian_unet import Unet256
 from utils.module import EarlyStopping, write_to_csv
 from dataloader.dataset import make_datapath_list, make_datapath_list_supervised, LabeledDataset, LabeledTransform, ValLabeledTransform, UnlabeledDataset, UnlabeledTransform
 
 
-def train(former_folname, folname, first=False, net="deeplab", batch_size=64, num_workers=2, epochs=300, alpha=100, beta=10, crop_size=256, supervised=False, num_samples=None):
+def train(former_folname, folname, first=False, net="deeplab", batch_size=64, num_workers=2, epochs=300, alpha=100, beta=10, crop_size=256, supervised=False, num_samples=None, cons_reg=True):
     # make dataloader
     if not supervised:
         makepath = make_datapath_list(former_folname, first)
@@ -43,8 +43,9 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
         val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
     # define loss function
-    class_criterion = DiceBCELoss()
-    cons_criterion = BayesBCELoss(alpha,beta)
+    criterion1 = DiceBCELoss()
+    criterion2 = BayesBCELoss(alpha,beta)
+    cons_criterion = RMSELoss()
 
     # define model
     if net == "deeplab":
@@ -74,7 +75,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
         if first:
             writer.writerow(['Epoch', 'Train Loss', 'Validation Loss'])
         else:
-            writer.writerow(['Epoch', 'Train Loss', 'Train Consistency Loss', 'Validation Loss'])
+            writer.writerow(['Epoch', 'Train Loss', 'Train Unlabel Loss', 'Train Consistency Loss', 'Validation Loss'])
 
     model = model.to(device)
 
@@ -83,13 +84,14 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
         start_time = time.time()
 
         running_train_loss = []
+        running_train_unlabel_loss = []
         running_train_cons_loss = []
         model.train()
         for image,mask in tqdm(train_labeled_dataloader):
             image = image.to(device,dtype=torch.float)
             mask = mask.to(device,dtype=torch.float)
             pred_mask = model.forward(image)
-            loss = class_criterion(pred_mask,mask)
+            loss = criterion1(pred_mask,mask)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -102,11 +104,19 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
                 var = var.to(device,dtype=torch.float)
 
                 pred_mask = model.forward(image)
-                loss = cons_criterion(pred_mask,mean,var)
+                loss = criterion2(pred_mask,mean,var)
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-                running_train_cons_loss.append(loss.item())
+                running_train_unlabel_loss.append(loss.item())
+                
+                if cons_reg:
+                    pred_mask2 = model.forward(image)
+                    loss = cons_criterion(pred_mask, pred_mask2)
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
+                    running_train_cons_loss.append(loss.item())
 
         running_val_loss = []
         model.eval()
@@ -115,15 +125,18 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
                 image = image.to(device,dtype=torch.float)
                 mask = mask.to(device,dtype=torch.float)
                 pred_mask = model.forward(image)
-                loss = class_criterion(pred_mask,mask)
+                loss = criterion1(pred_mask,mask)
                 running_val_loss.append(loss.item())
 
         epoch_train_loss = np.mean(running_train_loss)
         #print('Train loss: {}'.format(epoch_train_loss))
 
         if not first:
-            epoch_train_cons_loss = np.mean(running_train_cons_loss)
+            epoch_train_unlabel_loss = np.mean(running_train_unlabel_loss)
             #print('Train consistency loss: {}'.format(epoch_train_cons_loss))
+            
+        if cons_reg:
+            epoch_train_cons_loss = np.mean(running_train_cons_loss)
 
         epoch_val_loss = np.mean(running_val_loss)
         #print('Validation loss: {}'.format(epoch_val_loss))
@@ -133,7 +146,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
             loss = [epoch_train_loss, epoch_val_loss] 
             write_to_csv(epoch+1, loss, csv_filename)
         else:
-            loss = [epoch_train_loss, epoch_train_cons_loss, epoch_val_loss] 
+            loss = [epoch_train_loss, epoch_train_unlabel_loss, epoch_train_cons_loss, epoch_val_loss] 
             write_to_csv(epoch+1, loss, csv_filename)
 
         time_elapsed = time.time() - start_time
@@ -144,7 +157,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
             if first:
                 earlystopping(epoch_val_loss)
             else:
-                earlystopping(epoch_train_cons_loss)
+                earlystopping(epoch_train_unlabel_loss)
 
             if earlystopping.early_stop:
                 print("Early stopping")

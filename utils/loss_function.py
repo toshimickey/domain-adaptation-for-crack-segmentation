@@ -102,3 +102,18 @@ class BayesBCELoss(nn.Module):
 
         bce_loss = torch.mean(-torch.exp(-vars*self.alpha) * (targets * torch.log(inputs) + (1 - targets) * torch.log(1 - inputs)))
         return bce_loss*self.beta
+    
+class RMSELoss(nn.Module):
+    def __init__(self):
+        super(RMSELoss, self).__init__()
+
+    def forward(self, inputs, targets):
+        # model output = (X,1,224,224)
+        inputs = torch.sigmoid(inputs)
+        inputs = inputs.view(-1)
+        # model output2 = (X,1,224,224)
+        targets = torch.sigmoid(targets)
+        targets = targets.view(-1)
+
+        loss = torch.sqrt(torch.mean((inputs-targets)**2))
+        return loss
