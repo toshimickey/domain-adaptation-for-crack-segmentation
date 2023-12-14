@@ -113,7 +113,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
                 if cons_reg:
                     pred_mask1 = model.forward(image)
                     pred_mask2 = model.forward(image)
-                    loss = cons_criterion(pred_mask1, pred_mask2)
+                    loss = cons_criterion(pred_mask1, pred_mask2)*10
                     optimizer.zero_grad()
                     loss.backward()
                     optimizer.step()
