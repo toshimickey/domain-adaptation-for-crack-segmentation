@@ -12,7 +12,7 @@ from utils.module import EarlyStopping, write_to_csv
 from dataloader.dataset import make_datapath_list, make_datapath_list_supervised, LabeledDataset, LabeledTransform, ValLabeledTransform, UnlabeledDataset, UnlabeledTransform
 
 
-def train(former_folname, folname, first=False, net="deeplab", batch_size=64, num_workers=2, epochs=300, alpha=100, beta=10, crop_size=256, supervised=False, num_samples=None, cons_reg=True):
+def train(former_folname, folname, first=False, net="deeplab", batch_size=64, num_workers=2, epochs=300, alpha=100, beta=10, crop_size=256, supervised=False, num_samples=None, cons_reg=False):
     # make dataloader
     if not supervised:
         makepath = make_datapath_list(former_folname, first)
@@ -111,8 +111,9 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
                 running_train_unlabel_loss.append(loss.item())
                 
                 if cons_reg:
+                    pred_mask1 = model.forward(image)
                     pred_mask2 = model.forward(image)
-                    loss = cons_criterion(pred_mask, pred_mask2)
+                    loss = cons_criterion(pred_mask1, pred_mask2)
                     optimizer.zero_grad()
                     loss.backward()
                     optimizer.step()
