@@ -486,3 +486,30 @@ class make_datapath_list_supervised():
     for path in anno_path:
       anno_list.append(path)
     return img_list, anno_list
+  
+  
+class PanoImageDataset(Dataset):
+    def __init__(self, image_dir, file, transform=True):
+        self.image_dir = image_dir
+        self.transform = transform
+        self.file = file
+        
+        # 画像ファイルと対応するセグメンテーションマスクのリストを作成
+        self.image_files = glob.glob(self.image_dir + self.file + '*')
+        self.image_files = sorted(self.image_files, key=lambda x: (int(x.split('_')[3]), int(x.split('_')[4].rstrip('.jpg'))))
+        
+    def __len__(self):
+        return len(self.image_files)
+
+    def __getitem__(self, idx):
+        # 画像の読み込み
+        img_name = self.image_files[idx]
+        image = Image.open(img_name)
+        
+        resize = transforms.Resize((256,256))
+        image = resize(image)
+        
+        to_tensor = transforms.ToTensor()
+        image = to_tensor(image)
+            
+        return image
