@@ -74,9 +74,11 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
         writer = csv.writer(file)
         if first:
             writer.writerow(['Epoch', 'Train Loss', 'Validation Loss'])
-        else:
+        elif cons_reg:
             writer.writerow(['Epoch', 'Train Loss', 'Train Unlabel Loss', 'Train Consistency Loss', 'Validation Loss'])
-
+        else:
+            writer.writerow(['Epoch', 'Train Loss', 'Train Unlabel Loss', 'Validation Loss'])
+        
     model = model.to(device)
 
     for epoch in range(start_epoch, epochs):
@@ -113,7 +115,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
                 if cons_reg:
                     pred_mask1 = model.forward(image)
                     pred_mask2 = model.forward(image)
-                    loss = cons_criterion(pred_mask1, pred_mask2)*10
+                    loss = cons_criterion(pred_mask1, pred_mask2)
                     optimizer.zero_grad()
                     loss.backward()
                     optimizer.step()
@@ -146,8 +148,11 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
         if first:
             loss = [epoch_train_loss, epoch_val_loss] 
             write_to_csv(epoch+1, loss, csv_filename)
-        else:
+        elif cons_reg:
             loss = [epoch_train_loss, epoch_train_unlabel_loss, epoch_train_cons_loss, epoch_val_loss] 
+            write_to_csv(epoch+1, loss, csv_filename)
+        else:
+            loss = [epoch_train_loss, epoch_train_unlabel_loss, epoch_val_loss] 
             write_to_csv(epoch+1, loss, csv_filename)
 
         time_elapsed = time.time() - start_time
