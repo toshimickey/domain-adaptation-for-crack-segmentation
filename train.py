@@ -12,7 +12,7 @@ from utils.module import EarlyStopping, write_to_csv
 from dataloader.dataset import make_datapath_list, make_datapath_list_supervised, LabeledDataset, LabeledTransform, ValLabeledTransform, UnlabeledDataset, UnlabeledTransform
 
 
-def train(former_folname, folname, first=False, net="deeplab", batch_size=64, num_workers=2, epochs=300, alpha=100, beta=10, crop_size=256, supervised=False, num_samples=None, cons_reg=False):
+def train(former_folname, folname, first=False, net="deeplab", batch_size=64, num_workers=2, epochs=300, alpha=100, beta=10, crop_size=256, supervised=False, cons_reg=False):
     # make dataloader
     if not supervised:
         makepath = make_datapath_list(former_folname, first)
@@ -28,14 +28,9 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
     if not first:
         train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=UnlabeledTransform(crop_size=crop_size))
 
-    if num_samples:
-        source_weights = torch.tensor(np.load('source_weights2.npy'))
-        sampler = data.sampler.WeightedRandomSampler(source_weights, num_samples=num_samples, replacement=False)
-        train_labeled_dataloader = data.DataLoader(
-            train_labeled_dataset, batch_size=batch_size, sampler=sampler, shuffle=False, num_workers=num_workers, pin_memory=True)
-    else:
-        train_labeled_dataloader = data.DataLoader(
-            train_labeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+    train_labeled_dataloader = data.DataLoader(
+        train_labeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+    
     if not first:
         train_unlabeled_dataloader = data.DataLoader(
             train_unlabeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True, drop_last=True)
