@@ -60,7 +60,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     # img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
     # img_filename = [file.lstrip('data/Train/images/') for file in img_file_path]
     
-    img_file_path = sorted(glob.glob('data/2023-12-25/*'))
+    img_file_path = sorted(glob.glob('data/2023-12-27/*'))
     img_filename = [os.path.basename(file) for file in img_file_path]
     
     confidence_list = []

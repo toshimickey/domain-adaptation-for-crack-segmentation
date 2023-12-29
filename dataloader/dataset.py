@@ -22,7 +22,7 @@ class make_datapath_list():
     img_file_path3 = sorted(glob.glob('data/Test/images/*'))
     anno_file_path3 = sorted(glob.glob('data/Test/masks/*'))
     
-    img_file_path4 = sorted(glob.glob('data/2023-12-25/*'))
+    img_file_path4 = sorted(glob.glob('data/2023-12-27/*'))
 
     if not self.first:
       mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean_corrected/*'))
