@@ -17,7 +17,7 @@ class DeepLabv3plusModel:
 
     def _create_model(self):
         model = smp.DeepLabV3Plus(
-            encoder_name='resnet50',
+            encoder_name='resnet18',
             encoder_weights='imagenet',
             in_channels=3,
             classes=1
@@ -28,10 +28,6 @@ class DeepLabv3plusModel:
             encoder.layer2[0],
             Dropout2d(p=0.5),
             encoder.layer2[1],
-            Dropout2d(p=0.5),
-            encoder.layer2[2],
-            Dropout2d(p=0.5),
-            encoder.layer2[3],
             Dropout2d(p=0.5)
         )
         encoder.layer3 = torch.nn.Sequential(
