@@ -589,3 +589,28 @@ class PanoImageDataset(Dataset):
         image = to_tensor(image)
             
         return image
+      
+class OnlyImageDataset(Dataset):
+    def __init__(self, image_dir, transform=True):
+        self.image_dir = image_dir
+        self.transform = transform
+        
+        # 画像ファイルと対応するセグメンテーションマスクのリストを作成
+        self.image_files = glob.glob(self.image_dir + '*')
+        self.image_files = sorted(self.image_files)
+        
+    def __len__(self):
+        return len(self.image_files)
+
+    def __getitem__(self, idx):
+        # 画像の読み込み
+        img_name = self.image_files[idx]
+        image = Image.open(img_name)
+        
+        resize = transforms.Resize((256,256))
+        image = resize(image)
+        
+        to_tensor = transforms.ToTensor()
+        image = to_tensor(image)
+            
+        return image

@@ -24,12 +24,12 @@ class DeepLabv3plusModel:
         )
 
         encoder = model.encoder
-        encoder.layer2 = torch.nn.Sequential(
-            encoder.layer2[0],
-            Dropout2d(p=0.5),
-            encoder.layer2[1],
-            Dropout2d(p=0.5)
-        )
+        # encoder.layer2 = torch.nn.Sequential(
+        #     encoder.layer2[0],
+        #     Dropout2d(p=0.5),
+        #     encoder.layer2[1],
+        #     Dropout2d(p=0.5)
+        # )
         encoder.layer3 = torch.nn.Sequential(
             encoder.layer3[0],
             Dropout2d(p=0.5),

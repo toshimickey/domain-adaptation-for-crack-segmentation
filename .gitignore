@@ -5,3 +5,4 @@
 /__pycache__/
 .DS_Store
 /pytorch-CycleGAN-and-pix2pix/
+/outputs/
