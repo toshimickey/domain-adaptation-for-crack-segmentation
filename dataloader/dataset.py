@@ -82,13 +82,13 @@ import numpy as np
 #         anno_list.append(path)
 #       return img_list, anno_list
 
-# # Unlabeled → Volker sdimg
+# # Unlabeled → Volker predmeanになっていることに注意
 class make_datapath_list():
   def __init__(self,folname,first):
     self.folname = folname
     self.first = first
-    # img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
-    img_file_path = sorted(glob.glob('data/2024-01-07/*'))
+    img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
+    # img_file_path = sorted(glob.glob('data/2024-01-07/*'))
     # anno_file_path = sorted(glob.glob('data/Train/masks/Volker*'))
     
     img_file_path2 = sorted(glob.glob('data/Train/images/[!Volker]*'))
@@ -107,7 +107,7 @@ class make_datapath_list():
     anno_file_path5 = sorted(anno_file_path5, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
 
     if not self.first:
-      mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean_corrected/*'))
+      mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean/*'))
       var_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_var/*'))
 
     self.train_labeled_file_path = img_file_path2+img_file_path5[:4212]
