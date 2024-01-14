@@ -82,130 +82,47 @@ import numpy as np
 #         anno_list.append(path)
 #       return img_list, anno_list
 
-# # Unlabeled → Volker predmeanになっていることに注意
-class make_datapath_list():
-  def __init__(self,folname,first):
-    self.folname = folname
-    self.first = first
-    img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
-    # img_file_path = sorted(glob.glob('data/2024-01-07/*'))
-    # anno_file_path = sorted(glob.glob('data/Train/masks/Volker*'))
-    
-    img_file_path2 = sorted(glob.glob('data/Train/images/[!Volker]*'))
-    anno_file_path2 = sorted(glob.glob('data/Train/masks/[!Volker]*'))
-    
-    img_file_path3 = sorted(glob.glob('data/Test/images/Volker*'))
-    anno_file_path3 = sorted(glob.glob('data/Test/masks/Volker*'))
-
-    img_file_path4 = sorted(glob.glob('data/Test/images/[!Volker]*'))
-    anno_file_path4 = sorted(glob.glob('data/Test/masks/[!Volker]*'))
-    
-    img_file_path5 = sorted(glob.glob('data/original_split_resized/*'))
-    anno_file_path5 = sorted(glob.glob('data/teacher_split_resized/*'))
-    
-    img_file_path5 = sorted(img_file_path5, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
-    anno_file_path5 = sorted(anno_file_path5, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
-
-    if not self.first:
-      mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean/*'))
-      var_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_var/*'))
-
-    self.train_labeled_file_path = img_file_path2+img_file_path5[:4212]
-    self.train_anno_file_path = anno_file_path2+anno_file_path5[:4212]
-
-    self.train_unlabeled_file_path = img_file_path
-    if not self.first:
-      self.train_unlabeled_mean_path = mean_file_path
-      self.train_unlabeled_var_path = var_file_path
-
-    self.val_file_path = img_file_path4+img_file_path5[4212:5292]
-    self.val_anno_file_path = anno_file_path4+anno_file_path5[4212:5292]
-
-    self.test_file_path = img_file_path3
-    self.test_anno_file_path = anno_file_path3
-
-  def get_list(self, path_type):
-    if path_type=="train_labeled":
-      file_path = self.train_labeled_file_path
-      anno_path = self.train_anno_file_path
-    elif path_type=="train_unlabeled":
-      file_path = self.train_unlabeled_file_path
-      if not self.first:
-        mean_path = self.train_unlabeled_mean_path
-        var_path = self.train_unlabeled_var_path
-    elif path_type=="val":
-      file_path = self.val_file_path
-      anno_path = self.val_anno_file_path
-    else:
-      file_path = self.test_file_path
-      anno_path = self.test_anno_file_path
-
-    img_list = []
-    mean_list = []
-    var_list = []
-    anno_list = []
-    if path_type=="train_unlabeled":
-      if not self.first:
-          for path in file_path:
-            img_list.append(path)
-          for path in mean_path:
-            mean_list.append(path)
-          for path in var_path:
-            var_list.append(path)
-          return img_list, mean_list, var_list
-      else:
-        for path in file_path:
-          img_list.append(path)
-        return img_list
-    else:
-      for path in file_path:
-        img_list.append(path)
-      for path in anno_path:
-        anno_list.append(path)
-      return img_list, anno_list
-
-# ## Unlabeled → Chundata predmeanになっていることに注意
+# # # Unlabeled → Volker predmeanになっていることに注意
 # class make_datapath_list():
 #   def __init__(self,folname,first):
 #     self.folname = folname
 #     self.first = first
-#     img_file_path = sorted(glob.glob('data/Train/images/*'))
-#     anno_file_path = sorted(glob.glob('data/Train/masks/*'))
-
-#     img_file_path2 = sorted(glob.glob('data/original_split_resized/*'))
-#     anno_file_path2 = sorted(glob.glob('data/teacher_split_resized/*'))
-
-#     # with open("shuffle_indices.txt", "r") as file:
-#     #     shuffle_indices = list(map(int, file.read().split()))
-#     # # ランダムな並びを使用してリストを再構築
-#     # img_file_path2 = [img_file_path2[i] for i in shuffle_indices]
-#     # anno_file_path2 = [anno_file_path2[i] for i in shuffle_indices]
+#     img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
+#     # img_file_path = sorted(glob.glob('data/2024-01-07/*'))
+#     # anno_file_path = sorted(glob.glob('data/Train/masks/Volker*'))
     
-#     img_file_path2 = sorted(img_file_path2, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
-#     anno_file_path2 = sorted(anno_file_path2, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
+#     img_file_path2 = sorted(glob.glob('data/Train/images/[!Volker]*'))
+#     anno_file_path2 = sorted(glob.glob('data/Train/masks/[!Volker]*'))
+    
+#     img_file_path3 = sorted(glob.glob('data/Test/images/Volker*'))
+#     anno_file_path3 = sorted(glob.glob('data/Test/masks/Volker*'))
 
-#     img_file_path3 = sorted(glob.glob('data/Test/images/*'))
-#     anno_file_path3 = sorted(glob.glob('data/Test/masks/*'))
+#     img_file_path4 = sorted(glob.glob('data/Test/images/[!Volker]*'))
+#     anno_file_path4 = sorted(glob.glob('data/Test/masks/[!Volker]*'))
+    
+#     img_file_path5 = sorted(glob.glob('data/original_split_resized/*'))
+#     anno_file_path5 = sorted(glob.glob('data/teacher_split_resized/*'))
+    
+#     img_file_path5 = sorted(img_file_path5, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
+#     anno_file_path5 = sorted(anno_file_path5, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
 
 #     if not self.first:
 #       mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean/*'))
-#       mean_file_path = sorted(mean_file_path, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
 #       var_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_var/*'))
-#       var_file_path = sorted(var_file_path, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
 
-#     self.train_labeled_file_path = img_file_path
-#     self.train_anno_file_path = anno_file_path
+#     self.train_labeled_file_path = img_file_path2+img_file_path5[:4212]
+#     self.train_anno_file_path = anno_file_path2+anno_file_path5[:4212]
 
-#     self.train_unlabeled_file_path = img_file_path2[:4212]
+#     self.train_unlabeled_file_path = img_file_path
 #     if not self.first:
 #       self.train_unlabeled_mean_path = mean_file_path
 #       self.train_unlabeled_var_path = var_file_path
 
-#     self.val_file_path = img_file_path3
-#     self.val_anno_file_path = anno_file_path3
+#     self.val_file_path = img_file_path4+img_file_path5[4212:5292]
+#     self.val_anno_file_path = anno_file_path4+anno_file_path5[4212:5292]
 
-#     self.test_file_path = img_file_path2[4212:5292]
-#     self.test_anno_file_path = anno_file_path2[4212:5292]
+#     self.test_file_path = img_file_path3
+#     self.test_anno_file_path = anno_file_path3
 
 #   def get_list(self, path_type):
 #     if path_type=="train_labeled":
@@ -229,13 +146,13 @@ class make_datapath_list():
 #     anno_list = []
 #     if path_type=="train_unlabeled":
 #       if not self.first:
-#         for path in file_path:
-#           img_list.append(path)
-#         for path in mean_path:
-#           mean_list.append(path)
-#         for path in var_path:
-#           var_list.append(path)
-#         return img_list, mean_list, var_list
+#           for path in file_path:
+#             img_list.append(path)
+#           for path in mean_path:
+#             mean_list.append(path)
+#           for path in var_path:
+#             var_list.append(path)
+#           return img_list, mean_list, var_list
 #       else:
 #         for path in file_path:
 #           img_list.append(path)
@@ -246,6 +163,89 @@ class make_datapath_list():
 #       for path in anno_path:
 #         anno_list.append(path)
 #       return img_list, anno_list
+
+## Unlabeled → Chundata predmeanになっていることに注意
+class make_datapath_list():
+  def __init__(self,folname,first):
+    self.folname = folname
+    self.first = first
+    img_file_path = sorted(glob.glob('data/Train/images/*'))
+    anno_file_path = sorted(glob.glob('data/Train/masks/*'))
+
+    img_file_path2 = sorted(glob.glob('data/original_split_resized/*'))
+    anno_file_path2 = sorted(glob.glob('data/teacher_split_resized/*'))
+
+    # with open("shuffle_indices.txt", "r") as file:
+    #     shuffle_indices = list(map(int, file.read().split()))
+    # # ランダムな並びを使用してリストを再構築
+    # img_file_path2 = [img_file_path2[i] for i in shuffle_indices]
+    # anno_file_path2 = [anno_file_path2[i] for i in shuffle_indices]
+    
+    img_file_path2 = sorted(img_file_path2, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
+    anno_file_path2 = sorted(anno_file_path2, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
+
+    img_file_path3 = sorted(glob.glob('data/Test/images/*'))
+    anno_file_path3 = sorted(glob.glob('data/Test/masks/*'))
+
+    if not self.first:
+      mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean/*'))
+      mean_file_path = sorted(mean_file_path, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
+      var_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_var/*'))
+      var_file_path = sorted(var_file_path, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
+
+    self.train_labeled_file_path = img_file_path
+    self.train_anno_file_path = anno_file_path
+
+    self.train_unlabeled_file_path = img_file_path2[:4212]
+    if not self.first:
+      self.train_unlabeled_mean_path = mean_file_path
+      self.train_unlabeled_var_path = var_file_path
+
+    self.val_file_path = img_file_path3
+    self.val_anno_file_path = anno_file_path3
+
+    self.test_file_path = img_file_path2[4212:5292]
+    self.test_anno_file_path = anno_file_path2[4212:5292]
+
+  def get_list(self, path_type):
+    if path_type=="train_labeled":
+      file_path = self.train_labeled_file_path
+      anno_path = self.train_anno_file_path
+    elif path_type=="train_unlabeled":
+      file_path = self.train_unlabeled_file_path
+      if not self.first:
+        mean_path = self.train_unlabeled_mean_path
+        var_path = self.train_unlabeled_var_path
+    elif path_type=="val":
+      file_path = self.val_file_path
+      anno_path = self.val_anno_file_path
+    else:
+      file_path = self.test_file_path
+      anno_path = self.test_anno_file_path
+
+    img_list = []
+    mean_list = []
+    var_list = []
+    anno_list = []
+    if path_type=="train_unlabeled":
+      if not self.first:
+        for path in file_path:
+          img_list.append(path)
+        for path in mean_path:
+          mean_list.append(path)
+        for path in var_path:
+          var_list.append(path)
+        return img_list, mean_list, var_list
+      else:
+        for path in file_path:
+          img_list.append(path)
+        return img_list
+    else:
+      for path in file_path:
+        img_list.append(path)
+      for path in anno_path:
+        anno_list.append(path)
+      return img_list, anno_list
 
 
 class LabeledDataset(Dataset):
