@@ -2,7 +2,8 @@
 Unsupervised Domain Adaptation method using Bayesian Neural Network for crack segmentation.
 
 
-<img width="800" alt="スクリーンショット 2024-01-15 17 22 51" src="https://github.com/toshimickey/domain-adaptation-for-crack-segmentation/assets/84856948/b9bbf01a-4a71-45d6-b732-ef35a3eecb77">
+![全体像](https://github.com/toshimickey/domain-adaptation-for-crack-segmentation/assets/84856948/8e7b55ec-2d5c-4655-9734-ac31883fd754)
+
 
 
 ## How to prepare dataset
