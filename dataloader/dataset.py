@@ -529,12 +529,14 @@ class make_datapath_list_supervised():
 
     img_file_path2 = sorted(glob.glob('data/original_split_resized/*'))
     anno_file_path2 = sorted(glob.glob('data/teacher_split_resized/*'))
+    img_file_path2 = sorted(img_file_path2, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
+    anno_file_path2 = sorted(anno_file_path2, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
 
-    with open("shuffle_indices.txt", "r") as file:
-      shuffle_indices = list(map(int, file.read().split()))
-    # ランダムな並びを使用してリストを再構築
-    img_file_path2 = [img_file_path2[i] for i in shuffle_indices]
-    anno_file_path2 = [anno_file_path2[i] for i in shuffle_indices]
+    # with open("shuffle_indices.txt", "r") as file:
+    #   shuffle_indices = list(map(int, file.read().split()))
+    # # ランダムな並びを使用してリストを再構築
+    # img_file_path2 = [img_file_path2[i] for i in shuffle_indices]
+    # anno_file_path2 = [anno_file_path2[i] for i in shuffle_indices]
 
     self.train_labeled_file_path = img_file_path[:] + img_file_path2[:3500]
     self.train_anno_file_path = anno_file_path[:] + anno_file_path2[:3500]
@@ -542,8 +544,8 @@ class make_datapath_list_supervised():
     self.val_file_path = img_file_path2[3500:4292]
     self.val_anno_file_path = anno_file_path2[3500:4292]
 
-    self.test_file_path = img_file_path2[4292:5292]
-    self.test_anno_file_path = anno_file_path2[4292:5292]
+    self.test_file_path = img_file_path2[4212:5292]
+    self.test_anno_file_path = anno_file_path2[4212:5292]
 
   def get_list(self, path_type):
     if path_type=="train_labeled":
