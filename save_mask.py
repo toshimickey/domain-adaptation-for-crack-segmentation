@@ -54,14 +54,14 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
 
-    # img_filename = sorted(os.listdir('data/original_split_resized'))
-    # img_filename = sorted(img_filename, key=lambda x: (int(x.split('_')[0].lstrip('c')), int(x.split('_')[1])))
+    img_filename = sorted(os.listdir('data/original_split_resized'))
+    img_filename = sorted(img_filename, key=lambda x: (int(x.split('_')[0].lstrip('c')), int(x.split('_')[1])))
     
     # img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
     # img_filename = [file.lstrip('data/Train/images/') for file in img_file_path]
     
-    img_file_path = sorted(glob.glob('data/2023-12-25/*'))
-    img_filename = [os.path.basename(file) for file in img_file_path]
+    # img_file_path = sorted(glob.glob('data/2023-12-25/*'))
+    # img_filename = [os.path.basename(file) for file in img_file_path]
     
     confidence_list = []
 
@@ -112,7 +112,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
 
                 # pred_var[j]をtensor.ptとして保存
                 image_var = pred_var[j][0].cpu()
-                torch.save(image_var, f'data/unlabeled_mask/{folname}/pred_var/{img_filename[count]}'.rstrip('png')+'pt')
+                torch.save(image_var, f'data/unlabeled_mask/{folname}/pred_var/{img_filename[count]}'.rstrip('jpg')+'pt')
 
                 count += 1
                 if count == len(train_unlabeled_dataset):
@@ -129,7 +129,7 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
         indices = [index for index, _ in sorted_confidence[save_num:]]
         for index in indices:
             os.remove(f'data/unlabeled_mask/{folname}/pred_mean/{img_filename[index]}')
-            os.remove(f'data/unlabeled_mask/{folname}/pred_var/{img_filename[index]}'.rstrip('png')+'pt')
+            os.remove(f'data/unlabeled_mask/{folname}/pred_var/{img_filename[index]}'.rstrip('jpg')+'pt')
     
     
     former_path = f'data/unlabeled_mask/{folname}/pred_mean/'
