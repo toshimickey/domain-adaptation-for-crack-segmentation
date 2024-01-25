@@ -10,26 +10,39 @@ from scipy.ndimage import label
 from skimage import measure
 import torchvision.transforms as transforms
 from tqdm import tqdm
+import pandas as pd
 
-def process_image(image, area_threshold=100, compactness_threshold=0.015, eccentricity_threshold=0.95):
-    # 画像を2値化する
+def mean_anomaly_score(feature, df):
+    scores = []
+    for dataset in df.dataset.unique():
+        df_subset = df[df['dataset']==dataset]
+        data = df_subset['area_by_perimeter'].values
+        
+        # 平均と標準偏差の計算
+        mean = np.mean(data)
+        std = np.std(data)
+        
+        score = ((feature - mean) / std)**2
+        scores.append(score)
+    return sum(scores)/len(scores)
+
+# input(image, df)→ output(image_corrected)
+def process_image(image, df):
+    
     binary_image = image > 0
-
-    # 連結要素のラベリングを行う
     labeled_image, num_labels = label(binary_image)
-
-    # 各連結要素の特徴量を計算する
-    properties = measure.regionprops(labeled_image)
+    props = measure.regionprops(labeled_image)
 
     # 条件を満たさない連結要素を特定し、黒く塗りつぶす
-    for prop in properties:
-        area = prop.area
-        perimeter = prop.perimeter
-        eccentricity = prop.eccentricity
-
-        if area < area_threshold or area / (perimeter ** 2) > compactness_threshold: #or eccentricity < eccentricity_threshold:
+    for prop in props:
+        if prop.area < 100 or prop.eccentricity < 0.5 or prop.perimeter < 10 \
+                or prop.axis_minor_length <= 0 or prop.axis_major_length <= 0: 
             labeled_image[labeled_image == prop.label] = 0
-
+        else:
+            feature = prop.area/(prop.perimeter**2)
+            if mean_anomaly_score(feature, df) > 7.88:
+                labeled_image[labeled_image == prop.label] = 0
+            
     # 処理後の画像を返す
     crack_label = labeled_image > 0
     processed_image = np.where(crack_label, image, 0)
@@ -54,11 +67,11 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
 
-    # img_filename = sorted(os.listdir('data/original_split_resized'))
-    # img_filename = sorted(img_filename, key=lambda x: (int(x.split('_')[0].lstrip('c')), int(x.split('_')[1])))
+    img_filename = sorted(os.listdir('data/original_split_resized'))
+    img_filename = sorted(img_filename, key=lambda x: (int(x.split('_')[0].lstrip('c')), int(x.split('_')[1])))
     
-    img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
-    img_filename = [file.lstrip('data/Train/images/') for file in img_file_path]
+    # img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
+    # img_filename = [file.lstrip('data/Train/images/') for file in img_file_path]
     
     # img_file_path = sorted(glob.glob('data/2023-12-25/*'))
     # img_filename = [os.path.basename(file) for file in img_file_path]
@@ -135,10 +148,12 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     former_path = f'data/unlabeled_mask/{folname}/pred_mean/'
     latter_path = f'data/unlabeled_mask/{folname}/pred_mean_corrected/'
     files = sorted(os.listdir(former_path))
+    
+    train_feat_df = pd.read_csv("train_feat_df.csv")
 
     for i in tqdm(range(len(files))):
         image = Image.open(former_path+files[i])
         image = np.array(image)
-        image_corrected = process_image(image)
+        image_corrected = process_image(image, train_feat_df)
         image_tosave = Image.fromarray(image_corrected.astype('uint8'))
         image_tosave.save(latter_path+files[i])
