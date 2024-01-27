@@ -164,7 +164,7 @@ import numpy as np
 #         anno_list.append(path)
 #       return img_list, anno_list
 
-## Unlabeled → Chundata
+## Unlabeled → Chundata pred_meanであることに注意
 class make_datapath_list():
   def __init__(self,folname,first):
     self.folname = folname
@@ -188,7 +188,7 @@ class make_datapath_list():
     anno_file_path3 = sorted(glob.glob('data/Test/masks/*'))
 
     if not self.first:
-      mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean_corrected/*'))
+      mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_mean/*'))
       mean_file_path = sorted(mean_file_path, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))
       var_file_path = sorted(glob.glob(f'data/unlabeled_mask/{self.folname}/pred_var/*'))
       var_file_path = sorted(var_file_path, key=lambda x: (int(os.path.basename(x).split('_')[0].lstrip('c')), int(os.path.basename(x).split('_')[1])))

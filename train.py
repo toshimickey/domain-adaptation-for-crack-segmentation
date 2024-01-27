@@ -39,7 +39,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
 
     # define loss function
     criterion1 = DiceBCELoss()
-    criterion2 = BayesBCELoss(alpha,beta)
+    criterion2 = DiceBCELoss() #BayesBCELoss(alpha,beta)
     cons_criterion = RMSELoss()
 
     # define model
@@ -101,7 +101,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
                 var = var.to(device,dtype=torch.float)
 
                 pred_mask = model.forward(image)
-                loss = criterion2(pred_mask,mean,var)
+                loss = criterion2(pred_mask,mean) #var
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
