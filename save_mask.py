@@ -11,6 +11,13 @@ from skimage import measure
 import torchvision.transforms as transforms
 from tqdm import tqdm
 import pandas as pd
+import json
+
+def itemgetter(list,idx):
+    output = []
+    for i in idx:
+        output.append(list[i])
+    return output
 
 def mean_anomaly_score(feature, df):
     scores = []
@@ -73,8 +80,14 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     # img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
     # img_filename = [file.lstrip('data/Train/images/') for file in img_file_path]
     
-    img_file_path = sorted(glob.glob('data/sampled100/*'))
-    img_filename = [os.path.basename(file) for file in img_file_path]
+    # img_file_path = sorted(glob.glob('data/sampled100/*'))
+    # img_filename = [os.path.basename(file) for file in img_file_path]
+    
+    img_file_path = sorted(glob.glob('data/Train/images/*')) + sorted(glob.glob('data/original_split_resized/*'))
+    with open('data_split.json', 'r') as json_file:
+      idx = json.load(json_file)
+    img_file_path3 = sorted(itemgetter(img_file_path,idx[2]))
+    img_filename = [os.path.basename(file) for file in img_file_path3]
     
     confidence_list = []
 
