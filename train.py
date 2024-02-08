@@ -9,15 +9,19 @@ from utils.loss_function import DiceBCELoss, BayesBCELoss, RMSELoss
 from models.bayesian_deeplab import DeepLabv3plusModel
 from models.bayesian_unet import Unet256
 from utils.module import EarlyStopping, write_to_csv
-from dataloader.dataset import make_datapath_list, make_datapath_list_supervised, LabeledDataset, LabeledTransform, ValLabeledTransform, UnlabeledDataset, UnlabeledTransform
+from dataloader.dataset import make_datapath_list, make_datapath_list_supervised, make_datapath_list_fromJson, LabeledDataset, LabeledTransform, ValLabeledTransform, PseudoLabeledDataset, PseudoLabeledTransform
 
 
-def train(former_folname, folname, first=False, net="deeplab", batch_size=64, num_workers=2, epochs=300, alpha=100, beta=10, crop_size=256, supervised=False, cons_reg=False):
+def train(former_folname, folname, first=False, JsonDataSplit=False, target_dataset='chun', useStableDiffusion=False, net="deeplab", batch_size=64, num_workers=2, epochs=300, alpha=100, beta=10, crop_size=256, supervised=False, cons_reg=False):
     # make dataloader
     if not supervised:
-        makepath = make_datapath_list(former_folname, first)
+        if not JsonDataSplit:
+            makepath = make_datapath_list(former_folname, first, target_dataset, useStableDiffusion)
+        else:
+            makepath = make_datapath_list_fromJson(former_folname, first)
     else:
-        makepath = make_datapath_list_supervised()
+        makepath = make_datapath_list_supervised(target_dataset)
+            
     train_labeled_img_list, train_labeled_anno_list = makepath.get_list("train_labeled")
     if not first:
         train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list = makepath.get_list("train_unlabeled")
@@ -26,7 +30,7 @@ def train(former_folname, folname, first=False, net="deeplab", batch_size=64, nu
     train_labeled_dataset = LabeledDataset(train_labeled_img_list, train_labeled_anno_list, transform=LabeledTransform(crop_size=crop_size))
     val_dataset = LabeledDataset(val_img_list, val_anno_list, transform=ValLabeledTransform(crop_size=crop_size))
     if not first:
-        train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=UnlabeledTransform(crop_size=crop_size))
+        train_unlabeled_dataset = PseudoLabeledDataset(train_unlabeled_img_list, train_unlabeled_mean_list, train_unlabeled_var_list, transform=PseudoLabeledTransform(crop_size=crop_size))
 
     train_labeled_dataloader = data.DataLoader(
         train_labeled_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)

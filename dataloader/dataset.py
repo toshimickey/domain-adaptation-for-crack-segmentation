@@ -109,7 +109,7 @@ class make_datapath_list():
       anno_file_path3 = sorted(glob.glob('data/Test/masks/*'))
       
       # Stable Diffusion生成画像の格納先
-      img_file_path4 = sorted(glob.glob('data/sampled100/*'))
+      img_file_path4 = sorted(glob.glob('data/2023-12-25/*'))
 
       if not first:
         mean_file_path = sorted(glob.glob(f'data/unlabeled_mask/{folname}/pred_mean_corrected/*'))

@@ -1,6 +1,6 @@
 import torch
 import torch.utils.data as data
-from dataloader.dataset import make_datapath_list, UnlabeledDataset2, UnlabeledTransform2
+from dataloader.dataset import make_datapath_list, make_datapath_list_fromJson, UnlabeledDataset, UnlabeledTransform
 from models.bayesian_deeplab import DeepLabv3plusModel
 from models.bayesian_unet import Unet256
 import os, glob
@@ -55,12 +55,16 @@ def process_image(image, df):
     processed_image = np.where(crack_label, image, 0)
     return processed_image
 
-
-def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers=2, crop_size=256, pred_max=False, save_num=None):
-    # unlabeled dataに対するpred_mean, pred_varを保存
-    makepath = make_datapath_list(former_folname, first=True)
+# unlabeled dataに対するpred_mean, pred_varを保存
+def save_mask(former_folname, folname, JsonDataSplit=False, target_dataset='chun', useStableDiffusion=False, net="deeplab", batch_size=64, num_workers=2, crop_size=256, pred_max=False, save_num=None):
+    first = True
+    if not JsonDataSplit:
+        makepath = make_datapath_list(former_folname, first, target_dataset, useStableDiffusion)
+    else:
+        makepath = make_datapath_list_fromJson(former_folname, first)
+    
     train_unlabeled_img_list = makepath.get_list("train_unlabeled")
-    train_unlabeled_dataset = UnlabeledDataset2(train_unlabeled_img_list, transform=UnlabeledTransform2(crop_size=crop_size))
+    train_unlabeled_dataset = UnlabeledDataset(train_unlabeled_img_list, transform=UnlabeledTransform(crop_size=crop_size))
     train_unlabeled_dataloader = data.DataLoader(
         train_unlabeled_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
@@ -74,20 +78,23 @@ def save_mask(former_folname, folname, net="deeplab", batch_size=64, num_workers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
 
-    # img_filename = sorted(os.listdir('data/original_split_resized'))
-    # img_filename = sorted(img_filename, key=lambda x: (int(x.split('_')[0].lstrip('c')), int(x.split('_')[1])))
-    
-    # img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
-    # img_filename = [file.lstrip('data/Train/images/') for file in img_file_path]
-    
-    # img_file_path = sorted(glob.glob('data/sampled100/*'))
-    # img_filename = [os.path.basename(file) for file in img_file_path]
-    
-    img_file_path = sorted(glob.glob('data/Train/images/*')) + sorted(glob.glob('data/original_split_resized/*'))
-    with open('data_split.json', 'r') as json_file:
-      idx = json.load(json_file)
-    img_file_path3 = sorted(itemgetter(img_file_path,idx[2]))
-    img_filename = [os.path.basename(file) for file in img_file_path3]
+    if JsonDataSplit:
+        img_file_path = sorted(glob.glob('data/Train/images/*')) + sorted(glob.glob('data/original_split_resized/*'))
+        with open('data_split.json', 'r') as json_file:
+            idx = json.load(json_file)
+        img_file_path3 = sorted(itemgetter(img_file_path,idx[2]))
+        img_filename = [os.path.basename(file) for file in img_file_path3]
+    elif useStableDiffusion:
+        # stable diffusionのpath名
+        img_file_path = sorted(glob.glob('data/2023-12-25/*'))
+        img_filename = [os.path.basename(file) for file in img_file_path]
+    else:
+        if target_dataset == 'chun':
+            img_filename = sorted(os.listdir('data/original_split_resized'))
+            img_filename = sorted(img_filename, key=lambda x: (int(x.split('_')[0].lstrip('c')), int(x.split('_')[1])))
+        elif target_dataset == 'volker':
+            img_file_path = sorted(glob.glob('data/Train/images/Volker*'))
+            img_filename = [file.lstrip('data/Train/images/') for file in img_file_path]
     
     confidence_list = []
 

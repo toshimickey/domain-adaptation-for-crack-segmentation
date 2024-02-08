@@ -1,16 +1,21 @@
 from utils.segmentation_eval import DiceScore, Accuracy, Precision, Recall, Specificity
 import torch
 import torch.utils.data as data
-from dataloader.dataset import make_datapath_list, make_datapath_list_supervised, LabeledDataset, ValLabeledTransform
+from dataloader.dataset import make_datapath_list, make_datapath_list_supervised, make_datapath_list_fromJson, LabeledDataset, ValLabeledTransform
 from models.bayesian_deeplab import DeepLabv3plusModel
 from models.bayesian_unet import Unet256
 from tqdm import tqdm
 
-def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers=2, crop_size=256, supervised=False):
+def inference(former_folname, folname, JsonDataSplit=False, target_dataset='chun', useStableDiffusion=False, net="deeplab", batch_size=64, num_workers=2, crop_size=256, supervised=False):
+    first = True
     if not supervised:
-        makepath = make_datapath_list(former_folname, first=True)
+        if not JsonDataSplit:
+            makepath = make_datapath_list(former_folname, first, target_dataset, useStableDiffusion)
+        else:
+            makepath = make_datapath_list_fromJson(former_folname, first)
     else:
-        makepath = make_datapath_list_supervised()
+        makepath = make_datapath_list_supervised(target_dataset)    
+    
     test_img_list, test_anno_list = makepath.get_list("test")
     test_dataset = LabeledDataset(test_img_list, test_anno_list, transform=ValLabeledTransform(crop_size=crop_size))
     test_dataloader = data.DataLoader(
