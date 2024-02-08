@@ -59,7 +59,7 @@ def inference(former_folname, folname, net="deeplab", batch_size=64, num_workers
             preds = torch.cat(preds)
             pred_mask = torch.mean(preds, dim=0) # (16,1,256,256)
 
-            #　この中にsigmoid入っている
+            #　この中にsigmoid計算も含まれている
             scores.append(eval_method.forward(pred_mask,mask))
             scores1.append(eval_method1.forward(pred_mask,mask))
             scores2.append(eval_method2.forward(pred_mask,mask))
