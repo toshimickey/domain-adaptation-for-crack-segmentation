@@ -86,7 +86,7 @@ def save_mask(former_folname, folname, JsonDataSplit=False, target_dataset='chun
         img_filename = [os.path.basename(file) for file in img_file_path3]
     elif useStableDiffusion:
         # stable diffusionのpath名
-        img_file_path = sorted(glob.glob('data/2023-12-25/*'))
+        img_file_path = sorted(glob.glob('data/2023-12-25/*') + glob.glob('data/sampled100/*'))
         img_filename = [os.path.basename(file) for file in img_file_path]
     else:
         if target_dataset == 'chun':
