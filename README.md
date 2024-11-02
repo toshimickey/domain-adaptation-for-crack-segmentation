@@ -25,7 +25,7 @@ https://sites.google.com/view/pchun/
    - Follow the installation instructions for your operating system.
 2. Create a new environment:
     ```bash
-    conda create -n YOUR-ENV-NAME python=3.11
+    conda create -n YOUR-ENV-NAME python=3.10.15
     ```
 3. Activate the environment:
     ```bash
